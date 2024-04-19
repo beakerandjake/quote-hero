@@ -9,7 +9,8 @@ exec 3>&1 1>"$log_file" 2>&1
 date=20240415
 wiki_url=https://dumps.wikimedia.org/other/cirrussearch/${date}/enwikiquote-${date}-cirrussearch-content.json.gz
 raw_dump_file=wikiquote_raw.json.gz
-elastic_url=https://localhost:9200/wikiquote
+elastic_url=https://localhost:9200
+index_url="${elastic_url}/wikiquote"
 success_file=success_$date
 
 echo "Starting ingest process for date: $date" >&3
@@ -57,14 +58,14 @@ fi
 exists_status_code=$(
     curl --silent --insecure -u elastic:elastic \
         -o /dev/null -w "%{http_code}" \
-        -I "${elastic_url}?pretty"
+        -I "${index_url}?pretty"
 )
 if [ $exists_status_code = "200" ]; then
     echo 'Skipping index creation, index already exists.' >&3
 else 
     echo 'Creating elasticsearch index.' >&3
     curl --insecure -u elastic:elastic \
-        --silent -XPUT "$elastic_url" \
+        --silent -XPUT "$index_url" \
         -H "Content-Type: application/json" \
         -d @index_settings.json
     # fail if could not create index
@@ -83,14 +84,14 @@ for file_name in chunks/*; do
     curl --silent --show-error --fail-with-body -w '\n' \
         --insecure -u elastic:elastic \
         -H "Content-Type: application/x-ndjson" \
-        -XPOST "$elastic_url/_bulk" \
+        -XPOST "$index_url/_bulk" \
         --data-binary @"${file_name}" >> $log_file
     i=$((i + 1))
 done
 # flush to ensure all elastic writes all data to index
 echo -e '\nFlushing elasticsearch index.' >&3
 curl --fail-with-body --silent --insecure -u elastic:elastic \
-    -X POST "$elastic_url/_flush?pretty"
+    -X POST "$index_url/_flush?pretty"
 
 
 # remove the chunks and original dump now that they've been loaded into elastic

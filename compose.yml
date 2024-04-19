@@ -214,6 +214,13 @@ services:
       timeout: 10s
       retries: 120
 
+  ingest:
+    build: ingest
+    container_name: ingest
+    depends_on:
+      es01:
+        condition: service_healthy
+
 volumes:
   certs:
     driver: local

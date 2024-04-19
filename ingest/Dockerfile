@@ -6,5 +6,4 @@ WORKDIR /ingest
 
 COPY ingest.sh format_bulk_data.py index_settings.json wikiquote_raw.json.gz .
 
-ENTRYPOINT ["tail"]
-CMD ["-f","/dev/null"]
+ENTRYPOINT ["./ingest.sh"]

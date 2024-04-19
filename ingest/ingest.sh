@@ -55,17 +55,16 @@ fi
 
 # create the elastic index we will load the data into
 exists_status_code=$(
-    curl --insecure -u elastic:elastic \
-    --silent -o /dev/null \
-    -w "%{http_code}" \
-    -I "https://localhost:9200/wikiquote?pretty"
+    curl --silent --insecure -u elastic:elastic \
+        -o /dev/null -w "%{http_code}" \
+        -I "${elastic_url}?pretty"
 )
 if [ $exists_status_code = "200" ]; then
     echo 'Skipping index creation, index already exists.' >&3
 else 
     echo 'Creating elasticsearch index.' >&3
-    curl --fail-with-body --silent --show-error -w '\n' --insecure -u elastic:elastic \
-        -XPUT "$elastic_url/wikiquote" \
+    curl --insecure -u elastic:elastic \
+        --silent -XPUT "$elastic_url" \
         -H "Content-Type: application/json" \
         -d @index_settings.json
     # fail if could not create index

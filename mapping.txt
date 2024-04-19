@@ -1,0 +1,39 @@
+PUT /wikiquote/_mapping
+{
+  "properties": {
+    "title": {
+      "type": "keyword"
+    },
+    "page_id": {
+      "type": "keyword",
+      "index": false
+    },
+    "text": {
+      "type": "text" 
+    },
+    "popularity_score": {
+      "type": "double",
+      "index": false
+    }
+  }
+}
+
+curl -XPUT "https://es01:9200/wikiquote/_mapping" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -d'
+{
+  "properties": {
+    "title": {
+      "type": "keyword"
+    },
+    "page_id": {
+      "type": "keyword",
+      "index": false
+    },
+    "text": {
+      "type": "text"
+    },
+    "popularity_score": {
+      "type": "double",
+      "index": false
+    }
+  }
+}'

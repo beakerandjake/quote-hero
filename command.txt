@@ -1,0 +1,21 @@
+# grab a line from the real json
+head -n 4 wikiquote.json | tail -n 2             
+
+# post
+curl --insecure -u elastic:elastic -H 'Content-Type: application/x-ndjson' -X POST 'https://localhost:9200/wikiquote/_bulk?pretty' --data-binary @small.json
+
+
+# extract value from data
+jq '{title, page_id, text}' small.json 
+
+
+# test awk to strip from wiki dump
+awk 'NR % 2 {print | "jq -c '\''{index: {_id: .index._id}}'\''" } !(NR % 2) {print | "jq -c '\''{title, page_id, text}'\''"}' small.json
+
+
+tail -n 6 wikiquote.json | awk 'NR % 2 {print | "jq -c '\''{index: {_id: .index._id}}'\''" } !(NR % 2) {print | "jq -c '\''{title, page_id, text}'\''"}'
+
+jq '{index: {_id: .index._id}}'
+
+
+split the file and use the filter function to pipe to python script

@@ -1,14 +1,17 @@
 #!/bin/bash
 
-dump=wikiquote.json
+date=20240415
+url=https://dumps.wikimedia.org/other/cirrussearch/${date}/enwikiquote-${date}-cirrussearch-content.json.gz
+raw_file=wikiquote.json.gz
 
-echo 'splitting data into chunks'
+# download the dump from wikimedia.org
+# echo "downloading dump file"
+# wget $url -O $raw_file
 
+# split the large dump file into many smaller files.
+# during the split pipe each line through our custom formatter which removes data we won't be using. 
+echo 'splitting dump file into smaller chunks'
 mkdir -p chunks
-split -a 10  -l 500 $dump ./chunks/wikiquote_chunk_
+gunzip -c $raw_file | split -d --filter='python3 format_input.py > $FILE' -l 500 - ./chunks/wikiquote_chunk_
 
-# todo: --filter='python3 format_input.py'
-# for file in ./chunks/*
-# do
-#     cat $file | 
-# done
+# 

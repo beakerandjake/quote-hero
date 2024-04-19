@@ -1,6 +1,6 @@
 """
 Processes the wikimedia elasticsearch dump and removes all data not needed by our search program
-Operates on stdin and writes to stdout so it can be chained with other tools
+Reads each line from stdin and writes back to std out so this can be chained with other tools. 
 """
 
 import sys

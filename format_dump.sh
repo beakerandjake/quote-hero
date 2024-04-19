@@ -9,4 +9,4 @@ while IFS=$'\n' read -r line; do
         echo $line | jq -c '{title, page_id, text}'
     fi
     ((++i))
-done > test.txt
+done

@@ -1,0 +1,20 @@
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "keyword"
+      },
+      "page_id": {
+        "type": "keyword",
+        "index": false
+      },
+      "text": {
+        "type": "text"
+      },
+      "popularity_score": {
+        "type": "double",
+        "index": false
+      }
+    }
+  }
+}

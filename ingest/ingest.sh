@@ -1,17 +1,17 @@
 #!/bin/bash
 
 # fail if any command fails.
-# set -euo pipefail
+set -uo pipefail
 # write all output to log file
 log_file=ingest.log
 exec 3>&1 1>"$log_file" 2>&1
 
-date=20240415
+date=$DUMP_DATE
 wiki_url=https://dumps.wikimedia.org/other/cirrussearch/${date}/enwikiquote-${date}-cirrussearch-content.json.gz
 raw_dump_file=wikiquote_raw.json.gz
-elastic_url=https://localhost:9200
+elastic_url=$ELASTIC_SEARCH_SERVER
 index_url="${elastic_url}/wikiquote"
-success_file=success_$date
+success_file=success/success_$date
 
 echo "Starting ingest process for date: $date" >&3
 
@@ -89,10 +89,9 @@ fi
 
 
 # use the bulk api to load each chunk into elastic
-echo -en "Loading chunk(s) into elasticsearch" >&3
+echo "Loading ${chunk_count} chunk(s) into elasticsearch" >&3
 i=1
 for file_name in chunks/*; do
-    echo -en "\rLoading chunk(s) into elasticsearch: ${i}/${chunk_count}" >&3
     curl --silent --show-error --fail-with-body -w '\n' \
         --insecure -u elastic:elastic \
         -H "Content-Type: application/x-ndjson" \
@@ -101,7 +100,7 @@ for file_name in chunks/*; do
     i=$((i + 1))
 done
 # flush to ensure all elastic writes all data to index
-echo -e '\nFlushing elasticsearch index.' >&3
+echo 'Flushing elasticsearch index.' >&3
 curl --fail-with-body --silent --insecure -u elastic:elastic \
     -X POST "$index_url/_flush?pretty"
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # fail if any command fails.
-set -euo pipefail
+# set -euo pipefail
 # write all output to log file
 log_file=ingest.log
 exec 3>&1 1>"$log_file" 2>&1
@@ -31,6 +31,7 @@ elastic_status=$(
 )
 if [ $elastic_status != "200" ]; then
     echo 'Failed to connect to elastic server.' >&3
+    exit 1
 fi
 
 

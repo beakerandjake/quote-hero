@@ -160,6 +160,6 @@ cython_debug/
 #.idea/
 
 #wikiquote raw data dump
-wikiquote_raw.json.gz
+wikiquote.json.gz
 chunks/
 ingest/success_*

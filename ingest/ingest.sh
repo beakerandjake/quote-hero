@@ -27,7 +27,7 @@ if [ -e $raw_dump_file ]; then
     echo 'Skipping wikiquote dump download, file already exists.' >&3
 else 
     echo 'Downloading wikiquote dump file.' >&3
-    wget $wiki_url -O $raw_dump_file
+    wget -nv $wiki_url -O $raw_dump_file
     # if wget did not return 200 then bail
     if [ $? -ne 0 ]; then
         echo "Failed to download dump file, see $log_file" >&3
@@ -85,7 +85,7 @@ for file_name in chunks/*; do
         --insecure -u elastic:elastic \
         -H "Content-Type: application/x-ndjson" \
         -XPOST "$elastic_url/_bulk" \
-        --data-binary @"${file_name}" >> ingest.log
+        --data-binary @"${file_name}" >> $log_file
     i=$((i + 1))
 done
 # flush to ensure all elastic writes all data to index
@@ -95,7 +95,7 @@ curl --fail-with-body --silent --insecure -u elastic:elastic \
 
 
 # remove the chunks and original dump now that they've been loaded into elastic
-echo 'Removing wikimedia dump and chunk files.' >&3
+echo 'Removing wikiquote dump and chunk files.' >&3
 rm -r chunks
 rm $raw_dump_file
 

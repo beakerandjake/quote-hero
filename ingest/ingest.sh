@@ -30,11 +30,15 @@ gunzip -c $raw_file | split -d --filter='python3 format_bulk_data.py > $FILE' -l
 
 # create the elastic index we will load the data into
 echo 'creating elasticsearch index' 
-curl --fail-with-body --insecure -u elastic:elastic \
+curl --fail-with-body --silent -w '\n' --insecure -u elastic:elastic \
     -XPUT "https://localhost:9200/wikiquote" \
     -H "Content-Type: application/json" \
     -d @index_settings.json
-
+# fail if could not create index
+if [ $? -ne 0 ]; then
+    echo 'failed to create elasticsearch index'
+    exit 1
+fi
 
 
 # use the bulk api to load each chunk into elastic

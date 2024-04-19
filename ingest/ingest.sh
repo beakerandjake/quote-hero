@@ -10,6 +10,17 @@ date=20240415
 wiki_url=https://dumps.wikimedia.org/other/cirrussearch/${date}/enwikiquote-${date}-cirrussearch-content.json.gz
 raw_dump_file=wikiquote_raw.json.gz
 elastic_url=https://localhost:9200/wikiquote
+success_file=success_$date
+
+echo "Starting ingest process for date: $date" >&3
+
+
+# exit if this script has already run successfully. 
+if [ -e $success_file ]; then
+    echo "Successfully ingested data for dump date: $date" >&3
+    exit
+fi 
+
 
 # download the elasticsearch dump file from wikimedia.
 if [ -e $raw_dump_file ]; then
@@ -32,7 +43,7 @@ fi
 chunk_count=0
 if [ -d chunks ]; then
     chunk_count=$(ls chunks -1q | wc -l)
-    echo 'Not splitting dump file, chunk directory exists.' >&3
+    echo 'Skipping dump file chunking, directory exists.' >&3
 else 
     echo 'Splitting dump file into smaller chunks.' >&3
     mkdir -p chunks
@@ -41,19 +52,27 @@ else
     echo "Split file into $chunk_count chunk(s)." >&3
 fi
 
+
 # create the elastic index we will load the data into
-
-# curl --insecure -u elastic:elastic -I "https://localhost:9200/wikiquote?pretty"
-
-echo 'Creating elasticsearch index.' >&3
-curl --fail-with-body --silent --show-error -w '\n' --insecure -u elastic:elastic \
-    -XPUT "$elastic_url/wikiquote" \
-    -H "Content-Type: application/json" \
-    -d @index_settings.json
-# fail if could not create index
-if [ $? -ne 0 ]; then
-    echo "Failed to create elasticsearch index, see $log_file" >&3
-    exit 1
+exists_status_code=$(
+    curl --insecure -u elastic:elastic \
+    --silent -o /dev/null \
+    -w "%{http_code}" \
+    -I "https://localhost:9200/wikiquote?pretty"
+)
+if [ $exists_status_code = "200" ]; then
+    echo 'Skipping index creation, index already exists.' >&3
+else 
+    echo 'Creating elasticsearch index.' >&3
+    curl --fail-with-body --silent --show-error -w '\n' --insecure -u elastic:elastic \
+        -XPUT "$elastic_url/wikiquote" \
+        -H "Content-Type: application/json" \
+        -d @index_settings.json
+    # fail if could not create index
+    if [ $? -ne 0 ]; then
+        echo "Failed to create elasticsearch index, see $log_file" >&3
+        exit 1
+    fi
 fi
 
 
@@ -81,4 +100,6 @@ rm -r chunks
 rm $raw_dump_file
 
 
-echo 'Ingest complete.' >&3
+# create the success file so this script will not be re-run on restarts
+touch $success_file
+echo "Ingest complete for date: $date" >&3

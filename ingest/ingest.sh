@@ -8,20 +8,20 @@ exec 3>&1 1>"$log_file" 2>&1
 
 date=20240415
 wiki_url=https://dumps.wikimedia.org/other/cirrussearch/${date}/enwikiquote-${date}-cirrussearch-content.json.gz
-raw_file=wikiquote_raw.json.gz
+raw_dump_file=wikiquote_raw.json.gz
 elastic_url=https://localhost:9200/wikiquote
 
 # download the elasticsearch dump file from wikimedia.
-if [ -e $raw_file ]; then
+if [ -e $raw_dump_file ]; then
     echo 'Skipping wikiquote dump download, file already exists.' >&3
 else 
     echo 'Downloading wikiquote dump file.' >&3
-    wget $wiki_url -O $raw_file
+    wget $wiki_url -O $raw_dump_file
     # if wget did not return 200 then bail
     if [ $? -ne 0 ]; then
         echo "Failed to download dump file, see $log_file" >&3
         # clean up empty file that wget wrote.
-        rm $raw_file
+        rm $raw_dump_file
         exit 1
     fi
 fi
@@ -36,7 +36,7 @@ if [ -d chunks ]; then
 else 
     echo 'Splitting dump file into smaller chunks.' >&3
     mkdir -p chunks
-    gunzip -c $raw_file | split -d --filter='python3 format_bulk_data.py > $FILE' -l 500 - ./chunks/wikiquote_chunk_
+    gunzip -c $raw_dump_file | split -d --filter='python3 format_bulk_data.py > $FILE' -l 500 - ./chunks/wikiquote_chunk_
     chunk_count=$(ls chunks -1q | wc -l)
     echo "Split file into $chunk_count chunk(s)." >&3
 fi
@@ -78,7 +78,7 @@ curl --fail-with-body --silent --insecure -u elastic:elastic \
 # remove the chunks and original dump now that they've been loaded into elastic
 echo 'Removing wikimedia dump and chunk files.' >&3
 rm -r chunks
-rm $raw_file
+rm $raw_dump_file
 
 
 echo 'Ingest complete.' >&3

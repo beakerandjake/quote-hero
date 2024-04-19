@@ -23,6 +23,17 @@ if [ -e $success_file ]; then
 fi 
 
 
+# ensure server is online 
+elastic_status=$(
+    curl --silent --insecure -u elastic:elastic \
+        --output /dev/null -w "%{http_code}" \
+        -I "${index_url}"
+)
+if [ $elastic_status != "200" ]; then
+    echo 'Failed to connect to elastic server.' >&3
+fi
+
+
 # download the elasticsearch dump file from wikimedia.
 if [ -e $raw_dump_file ]; then
     echo 'Skipping wikiquote dump download, file already exists.' >&3

@@ -10,7 +10,7 @@ logging.basicConfig(
     format="%(levelname)s: %(message)s",
     level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
 )
-ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote_2")
+ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "https://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
 DUMP_FILE_PATH = "wikiquote.json"
@@ -29,7 +29,7 @@ def get_dump_date():
     return os.environ.get("DUMP_DATE", "20240415")
 
 
-def ensure_server_running():
+def elastic_server_running():
     """Returns true if the elastic server is running."""
     logging.debug(f"Checking if elastic server is running at: {ELASTIC_SERVER_URL}")
     try:
@@ -115,14 +115,38 @@ def create_index():
         return
     # create the index with the specified settings
     logger.info(f"Creating index: '{ELASTIC_INDEX}'")
-    create = requests.put(
-        ELASTIC_INDEX_URL,
-        data=open("index_settings.json", "rb"),
-        headers={"Content-Type": "application/json"},
+    with open("index_settings.json", "rb") as settings_data:
+        create = requests.put(
+            ELASTIC_INDEX_URL,
+            data=settings_data,
+            headers={"Content-Type": "application/json"},
+            auth=("elastic", "elastic"),
+            verify=False,
+        )
+    logger.info(f"Successfully created index: '{ELASTIC_INDEX}'")
+
+
+def bulk_load_into_elastic():
+    """Bulk load each chunk into elastic"""
+    logger.info(f"Bulk importing data into index: {ELASTIC_INDEX}.")
+    # post each chunk to the bulk import api
+    for chunk in os.listdir(CHUNKS_DIR):
+        logger.debug(f"importing chunk: {chunk}")
+        with open(os.path.join(CHUNKS_DIR, chunk), "rb") as chunk_data:
+            requests.post(
+                f"{ELASTIC_INDEX_URL}/_bulk",
+                data=chunk_data,
+                headers={"Content-Type": "application/x-ndjson"},
+                auth=("elastic", "elastic"),
+                verify=False,
+            )
+    logger.info("Bulk import success, flushing index.")
+    # ask elastic to flush the index once bulk load is complete
+    requests.post(
+        f"{ELASTIC_INDEX_URL}/_flush",
         auth=("elastic", "elastic"),
         verify=False,
     )
-    logger.info(f"Successfully created index: '{ELASTIC_INDEX}'")
 
 
 # check if success file exits, if so exit early
@@ -130,13 +154,13 @@ def main():
     dump_date = get_dump_date()
     logging.info(f"Starting ingest for date: {dump_date}")
     # can't ingest data if the server isn't running
-    if not ensure_server_running():
+    if not elastic_server_running():
         logging.error("Failed to connect to elasticsearch server")
         exit(1)
     download_wikiquote_dump(dump_date)
     split_dump_file()
     create_index()
-    # bulk_load_into_elastic()
+    bulk_load_into_elastic()
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ import gzip
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     format="%(levelname)s: %(message)s",
-    level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
+    level=os.environ.get("LOG_LEVEL", "INFO").upper(),
 )
 
 SUCCESS_FILE_DIR = os.environ.get(

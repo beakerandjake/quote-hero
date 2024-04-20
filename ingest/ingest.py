@@ -2,7 +2,8 @@ import logging
 import os
 import json
 import requests
-
+import shutil
+import gzip
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -11,8 +12,8 @@ logging.basicConfig(
 )
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "https://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/wikiquote"
-ZIPPED_DUMP_FILE_PATH = "wikiquote.json.gz"
-UNZIPPED_DUMP_FILE_PATH = "wikiquote.json"
+DUMP_FILE_PATH = "wikiquote.json"
+CHUNKS_DIR = "chunks"
 WIKI_DUMP_URL_TEMPLATE = os.environ.get(
     "WIKIQUOTE_DUMP_URL_TEMPLATE",
     "https://dumps.wikimedia.org/other/cirrussearch/{date}/etwikimedia-{date}-cirrussearch-general.json.gz",
@@ -44,23 +45,35 @@ def ensure_server_running():
         return False
 
 
-def download_wikiquote_dump():
+def download_wikiquote_dump(dump_date):
     """Downloads the elastic search data for wikiquote"""
-    if os.path.isfile(ZIPPED_DUMP_FILE_PATH):
+    if os.path.isfile(DUMP_FILE_PATH):
         logging.info(f"Skipping wikiquote dump download, file already exists.")
         return
-    logging.info(f"Downloading wikimedia dump file.")
+    logging.info(f"Downloading wikiquote dump file.")
     url = str.format(WIKI_DUMP_URL_TEMPLATE, date=dump_date)
+    archive_file_path = "dump.gz"
+
+    # download the archive
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         # stream file to disk
-        with open(ZIPPED_DUMP_FILE_PATH, "wb") as f:
+        with open(archive_file_path, "wb") as f:
             for chunk in r.iter_content(2048):
                 if chunk:
                     f.write(chunk)
 
+    # unzip the archive
+    logging.info(f"Decompressing wikiquote dump file.")
+    with gzip.open(archive_file_path, "rb") as src:
+        with open(DUMP_FILE_PATH, "wb") as dest:
+            shutil.copyfileobj(src, dest)
 
-def chunk_dump_file():
+    # delete the original archive
+    os.remove(archive_file_path)
+
+
+def split_dump_file():
     """Splits the wikiquote dump file into chunks"""
     if os.path.isdir("chunks"):
         logger.info("Skipping dump file chunking, chunk directory already exists.")
@@ -70,25 +83,29 @@ def chunk_dump_file():
     num_chunks = 0
     current_chunk_file = None
     document_keys = {"title", "page_id", "text"}
-    with open(ZIPPED_DUMP_FILE_PATH) as dump_file:
+    # ensure chunks dir exists before attempt to write to it.
+    os.mkdir(CHUNKS_DIR)
+    with open(DUMP_FILE_PATH) as dump_file:
         for i, line in enumerate(dump_file):
+            # write out current chunk file and start a new one.
             if i % lines_per_chunk == 0:
-                # finished with current chunk
                 if current_chunk_file:
                     num_chunks += 1
                     current_chunk_file.close()
-                current_chunk_file = open(f"chunk_{num_chunks}", "w")
-            parsed_line = json.loads(raw_line)
+                new_chunk_file_path = os.path.join(CHUNKS_DIR, f"chunk_{num_chunks}")
+                current_chunk_file = open(new_chunk_file_path, "w")
+            formatted = None
             # expect even lines are for metadata
-            if line_number % 2 == 0:
-                current_chunk_file.write(
-                    json.dumps({"index": {"_id": parsed_line["index"]["_id"]}})
+            if i % 2 == 0:
+                formatted = json.dumps(
+                    {"index": {"_id": json.loads(line)["index"]["_id"]}}
                 )
             # expect odd lines are for documents
             else:
-                current_chunk_file.write(
-                    json.dumps({key: parsed_line[key] for key in document_keys})
-                )
+                line_json = json.loads(line)
+                formatted = json.dumps({key: line_json[key] for key in document_keys})
+            # write the formatted line to the current chunk file
+            current_chunk_file.write(formatted + "\n")
     # ensure final chunk in progress in closed
     if current_chunk_file:
         current_chunk_file.close()
@@ -102,9 +119,8 @@ def main():
     if not ensure_server_running():
         logging.error("Failed to connect to elasticsearch server")
         exit(1)
-    download_wikiquote_dump()
-    unzip_dump_file()
-    chunk_dump_file()
+    download_wikiquote_dump(dump_date)
+    split_dump_file()
 
 
 if __name__ == "__main__":

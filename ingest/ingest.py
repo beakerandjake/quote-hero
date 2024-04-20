@@ -10,8 +10,9 @@ logging.basicConfig(
     format="%(levelname)s: %(message)s",
     level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
 )
+ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote_2")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "https://localhost:9200")
-ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/wikiquote"
+ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
 DUMP_FILE_PATH = "wikiquote.json"
 CHUNKS_DIR = "chunks"
 WIKI_DUMP_URL_TEMPLATE = os.environ.get(
@@ -32,14 +33,8 @@ def ensure_server_running():
     """Returns true if the elastic server is running."""
     logging.debug(f"Checking if elastic server is running at: {ELASTIC_SERVER_URL}")
     try:
-        return (
-            requests.get(
-                ELASTIC_SERVER_URL,
-                auth=("elastic", "elastic"),
-                verify=False,
-            ).status_code
-            == 200
-        )
+        r = requests.get(ELASTIC_SERVER_URL, auth=("elastic", "elastic"), verify=False)
+        return r.status_code == 200
     except Exception as e:
         logger.error(e)
         return False
@@ -109,6 +104,27 @@ def split_dump_file():
     logger.info(f"Split dump file into {num_chunks} chunk file(s).")
 
 
+def create_index():
+    """Creates the elastic index to hold the wikiquote data."""
+    # skip creation if index already exists.
+    exists = requests.get(ELASTIC_INDEX_URL, auth=("elastic", "elastic"), verify=False)
+    if exists.status_code == 200:
+        logger.info(
+            f"Skipping index creation, index: '{ELASTIC_INDEX}' already exists."
+        )
+        return
+    # create the index with the specified settings
+    logger.info(f"Creating index: '{ELASTIC_INDEX}'")
+    create = requests.put(
+        ELASTIC_INDEX_URL,
+        data=open("index_settings.json", "rb"),
+        headers={"Content-Type": "application/json"},
+        auth=("elastic", "elastic"),
+        verify=False,
+    )
+    logger.info(f"Successfully created index: '{ELASTIC_INDEX}'")
+
+
 # check if success file exits, if so exit early
 def main():
     dump_date = get_dump_date()
@@ -119,6 +135,8 @@ def main():
         exit(1)
     download_wikiquote_dump(dump_date)
     split_dump_file()
+    create_index()
+    # bulk_load_into_elastic()
 
 
 if __name__ == "__main__":

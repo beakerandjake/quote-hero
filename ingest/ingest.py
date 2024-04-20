@@ -15,7 +15,7 @@ SUCCESS_FILE_DIR = os.environ.get(
     "SUCCESS_FILE_DIR", os.path.join(os.path.dirname(__file__), "success")
 )
 ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
-ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "https://localhost:9200")
+ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "http://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
 DUMP_DATE = os.environ.get("DUMP_DATE", "20240415")
 DUMP_URL_TEMPLATE = os.environ.get(
@@ -45,7 +45,7 @@ def elastic_server_running():
     """Returns true if the elastic server is running."""
     logging.debug(f"Checking if elastic server is running at: {ELASTIC_SERVER_URL}")
     try:
-        r = requests.get(ELASTIC_SERVER_URL, auth=("elastic", "elastic"), verify=False)
+        r = requests.get(ELASTIC_SERVER_URL)
         return r.status_code == 200
     except Exception as e:
         logger.error(e)
@@ -119,7 +119,7 @@ def split_dump_file():
 def create_index():
     """Creates the elastic index to hold the wikiquote data."""
     # skip creation if index already exists.
-    exists = requests.get(ELASTIC_INDEX_URL, auth=("elastic", "elastic"), verify=False)
+    exists = requests.get(ELASTIC_INDEX_URL)
     if exists.status_code == 200:
         logger.info(
             f"Skipping index creation, index: '{ELASTIC_INDEX}' already exists."
@@ -132,8 +132,6 @@ def create_index():
             ELASTIC_INDEX_URL,
             data=settings_data,
             headers={"Content-Type": "application/json"},
-            auth=("elastic", "elastic"),
-            verify=False,
         )
     logger.info(f"Successfully created index: '{ELASTIC_INDEX}'")
 
@@ -149,16 +147,10 @@ def bulk_load_into_elastic():
                 f"{ELASTIC_INDEX_URL}/_bulk",
                 data=chunk_data,
                 headers={"Content-Type": "application/x-ndjson"},
-                auth=("elastic", "elastic"),
-                verify=False,
             )
     logger.info("Bulk import success, flushing index.")
     # ask elastic to flush the index once bulk load is complete
-    requests.post(
-        f"{ELASTIC_INDEX_URL}/_flush",
-        auth=("elastic", "elastic"),
-        verify=False,
-    )
+    requests.post(f"{ELASTIC_INDEX_URL}/_flush")
 
 
 def save_success(dump_date):

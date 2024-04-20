@@ -1,8 +1,5 @@
 from fastapi import FastAPI
+from .routes import words
 
 app = FastAPI()
-
-
-@app.get("/")
-async def index():
-    return "Hello World!"
+app.include_router(words.router)

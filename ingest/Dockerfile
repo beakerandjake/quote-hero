@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ingest.py index_settings.json wikiquote.json .
 
-CMD [ "python", "./ingest.py" ]
+CMD [ "python", "ingest.py" ]

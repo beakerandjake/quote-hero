@@ -2,7 +2,9 @@ import os
 from random import randrange
 
 # expect a words file to exist in our current dir.
-words_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "words.txt")
+words_file_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "words.txt"
+)
 
 
 def random_word():

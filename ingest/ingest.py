@@ -16,8 +16,8 @@ DUMP_FILE_PATH = "wikiquote.json"
 CHUNKS_DIR = "chunks"
 WIKI_DUMP_URL_TEMPLATE = os.environ.get(
     "WIKIQUOTE_DUMP_URL_TEMPLATE",
-    "https://dumps.wikimedia.org/other/cirrussearch/{date}/etwikimedia-{date}-cirrussearch-general.json.gz",
-    # "https://dumps.wikimedia.org/other/cirrussearch/{date}/enwikiquote-{date}-cirrussearch-content.json.gz",
+    # "https://dumps.wikimedia.org/other/cirrussearch/{date}/etwikimedia-{date}-cirrussearch-general.json.gz",
+    "https://dumps.wikimedia.org/other/cirrussearch/{date}/enwikiquote-{date}-cirrussearch-content.json.gz",
 )
 
 
@@ -53,7 +53,6 @@ def download_wikiquote_dump(dump_date):
     logging.info(f"Downloading wikiquote dump file.")
     url = str.format(WIKI_DUMP_URL_TEMPLATE, date=dump_date)
     archive_file_path = "dump.gz"
-
     # download the archive
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -62,13 +61,11 @@ def download_wikiquote_dump(dump_date):
             for chunk in r.iter_content(2048):
                 if chunk:
                     f.write(chunk)
-
     # unzip the archive
     logging.info(f"Decompressing wikiquote dump file.")
     with gzip.open(archive_file_path, "rb") as src:
         with open(DUMP_FILE_PATH, "wb") as dest:
             shutil.copyfileobj(src, dest)
-
     # delete the original archive
     os.remove(archive_file_path)
 
@@ -80,7 +77,7 @@ def split_dump_file():
         return
     logger.info("Splitting dump file into chunks")
     lines_per_chunk = 500
-    num_chunks = 0
+    num_chunks = 1
     current_chunk_file = None
     document_keys = {"title", "page_id", "text"}
     # ensure chunks dir exists before attempt to write to it.
@@ -109,6 +106,7 @@ def split_dump_file():
     # ensure final chunk in progress in closed
     if current_chunk_file:
         current_chunk_file.close()
+    logger.info(f"Split dump file into {num_chunks} chunk file(s).")
 
 
 # check if success file exits, if so exit early

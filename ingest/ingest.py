@@ -8,12 +8,11 @@ import gzip
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     format="%(levelname)s: %(message)s",
-    level=os.environ.get("LOG_LEVEL", "INFO").upper(),
+    level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
 )
 
-SUCCESS_FILE_DIR = os.environ.get(
-    "SUCCESS_FILE_DIR", os.path.join(os.path.dirname(__file__), "success")
-)
+ROOT_DIR = os.path.dirname(__file__)
+SUCCESS_FILE_DIR = os.path.join(ROOT_DIR, os.environ.get("SUCCESS_FILE_DIR", "success"))
 ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "http://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
@@ -23,8 +22,8 @@ DUMP_URL_TEMPLATE = os.environ.get(
     # "https://dumps.wikimedia.org/other/cirrussearch/{date}/etwikimedia-{date}-cirrussearch-general.json.gz",
     "https://dumps.wikimedia.org/other/cirrussearch/{date}/enwikiquote-{date}-cirrussearch-content.json.gz",
 )
-DUMP_FILE_PATH = "wikiquote.json"
-CHUNKS_DIR = "chunks"
+DUMP_FILE_PATH = os.path.join(ROOT_DIR, "wikiquote.json")
+CHUNKS_DIR = os.path.join(ROOT_DIR, "chunks")
 
 
 def get_dump_date():
@@ -170,6 +169,7 @@ def remove_dump_files():
 
 # check if success file exits, if so exit early
 def main():
+    print(ROOT_DIR)
     dump_date = get_dump_date()
     logging.info(f"Starting ingest for date: {dump_date}")
     # don't re-ingest if already ingested
@@ -186,7 +186,7 @@ def main():
     bulk_load_into_elastic()
     remove_dump_files()
     save_success(dump_date)
-    logger.info(f"Successfully ingested data for date: ${dump_date}")
+    logger.info(f"Successfully ingested data for date: {dump_date}")
 
 
 if __name__ == "__main__":

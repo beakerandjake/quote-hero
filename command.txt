@@ -19,3 +19,39 @@ jq '{index: {_id: .index._id}}'
 
 
 split the file and use the filter function to pipe to python script
+
+
+curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_phrase": {
+      "message": "this is a test"
+    }
+  }
+}
+'
+
+curl -X GET "localhost:9200/wikiquote/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match": {
+      "text": "cat hip"
+    }
+  }
+}
+'
+
+curl -X GET "localhost:9200/wikiquote/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "sort" : [
+    { "popularity_score" : {"order" : "desc"}}
+  ],
+  "query": {
+    "match_phrase" : {
+        "text" : "cool guy"
+    }
+  }
+}
+'
+
+

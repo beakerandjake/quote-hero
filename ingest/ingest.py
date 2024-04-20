@@ -16,6 +16,7 @@ SUCCESS_FILE_DIR = os.path.join(ROOT_DIR, os.environ.get("SUCCESS_FILE_DIR", "su
 ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "http://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
+ELASTIC_INDEX_SETTINGS_PATH = os.path.join(ROOT_DIR, "index_settings.json")
 DUMP_DATE = os.environ.get("DUMP_DATE", "20240415")
 DUMP_URL_TEMPLATE = os.environ.get(
     "DUMP_URL_TEMPLATE",
@@ -85,7 +86,15 @@ def split_dump_file():
     lines_per_chunk = 500
     num_chunks = 1
     current_chunk_file = None
-    document_keys = {"title", "page_id", "text"}
+    document_keys = {}
+    # load the keys specified by the index settings.
+    with open(ELASTIC_INDEX_SETTINGS_PATH) as settings:
+        document_keys = set(json.load(settings)["mappings"]["properties"].keys())
+        if not document_keys:
+            raise RuntimeError(
+                f"Could not load properties from index settings: {ELASTIC_INDEX_SETTINGS_PATH}"
+            )
+        logger.debug(f"Extracting keys: {list(document_keys)} from data dump")
     # ensure chunks dir exists before attempt to write to it.
     os.mkdir(CHUNKS_DIR)
     with open(DUMP_FILE_PATH) as dump_file:
@@ -106,7 +115,9 @@ def split_dump_file():
             # expect odd lines are for documents
             else:
                 line_json = json.loads(line)
-                formatted = json.dumps({key: line_json[key] for key in document_keys})
+                formatted = json.dumps(
+                    {key: line_json.get(key) for key in document_keys}
+                )
             # write the formatted line to the current chunk file
             current_chunk_file.write(formatted + "\n")
     # ensure final chunk in progress in closed
@@ -126,12 +137,13 @@ def create_index():
         return
     # create the index with the specified settings
     logger.info(f"Creating index: '{ELASTIC_INDEX}'")
-    with open("index_settings.json", "rb") as settings_data:
+    with open(ELASTIC_INDEX_SETTINGS_PATH, "rb") as settings_data:
         create = requests.put(
             ELASTIC_INDEX_URL,
             data=settings_data,
             headers={"Content-Type": "application/json"},
         )
+        create.raise_for_status()
     logger.info(f"Successfully created index: '{ELASTIC_INDEX}'")
 
 
@@ -142,11 +154,14 @@ def bulk_load_into_elastic():
     for chunk in os.listdir(CHUNKS_DIR):
         logger.debug(f"importing chunk: {chunk}")
         with open(os.path.join(CHUNKS_DIR, chunk), "rb") as chunk_data:
-            requests.post(
+            r = requests.post(
                 f"{ELASTIC_INDEX_URL}/_bulk",
                 data=chunk_data,
                 headers={"Content-Type": "application/x-ndjson"},
             )
+            if r.status_code != 200:
+                print(r.content)
+            r.raise_for_status()
     logger.info("Bulk import success, flushing index.")
     # ask elastic to flush the index once bulk load is complete
     requests.post(f"{ELASTIC_INDEX_URL}/_flush")

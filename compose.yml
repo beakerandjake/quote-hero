@@ -214,17 +214,18 @@ services:
       timeout: 10s
       retries: 120
 
-  # ingest:
-  #   build: ingest
-  #   container_name: ingest
-  #   depends_on:
-  #     es01:
-  #       condition: service_healthy
-  #   environment:
-  #     - DUMP_DATE=20240415
-  #     - ELASTIC_SEARCH_SERVER=https://es01:9200
-  #   volumes:
-  #     - ingest:/ingest/success
+  ingest:
+    build: ingest
+    container_name: ingest
+    depends_on:
+      es01:
+        condition: service_healthy
+    environment:
+      - LOG_LEVEL=DEBUG
+      - ELASTIC_SERVER_URL=https://es01:9200
+      - DUMP_DATE=20240415
+    volumes:
+      - ingest:/ingest/success
 
 volumes:
   certs:

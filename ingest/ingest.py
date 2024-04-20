@@ -10,19 +10,20 @@ logging.basicConfig(
     format="%(levelname)s: %(message)s",
     level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
 )
+
 SUCCESS_FILE_DIR = os.environ.get(
     "SUCCESS_FILE_DIR", os.path.join(os.path.dirname(__file__), "success")
 )
 ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "https://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
-DUMP_FILE_PATH = "wikiquote.json"
-CHUNKS_DIR = "chunks"
 WIKI_DUMP_URL_TEMPLATE = os.environ.get(
     "WIKIQUOTE_DUMP_URL_TEMPLATE",
     # "https://dumps.wikimedia.org/other/cirrussearch/{date}/etwikimedia-{date}-cirrussearch-general.json.gz",
     "https://dumps.wikimedia.org/other/cirrussearch/{date}/enwikiquote-{date}-cirrussearch-content.json.gz",
 )
+DUMP_FILE_PATH = "wikiquote.json"
+CHUNKS_DIR = "chunks"
 
 
 def get_dump_date():
@@ -57,7 +58,7 @@ def download_wikiquote_dump(dump_date):
         return
     logging.info(f"Downloading wikiquote dump file.")
     url = str.format(WIKI_DUMP_URL_TEMPLATE, date=dump_date)
-    archive_file_path = "dump.gz"
+    archive_file_path = f"{DUMP_FILE_PATH}.gz"
     # download the archive
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -167,6 +168,13 @@ def save_success(dump_date):
     open(success_file_path, "w").close()
 
 
+def remove_dump_files():
+    """Removes the dump file and chunks from the file system"""
+    logger.info("Removing dump file and chunks")
+    os.remove(DUMP_FILE_PATH)
+    shutil.rmtree(CHUNKS_DIR)
+
+
 # check if success file exits, if so exit early
 def main():
     dump_date = get_dump_date()
@@ -182,7 +190,8 @@ def main():
     download_wikiquote_dump(dump_date)
     split_dump_file()
     create_index()
-    # bulk_load_into_elastic()
+    bulk_load_into_elastic()
+    remove_dump_files()
     save_success(dump_date)
     logger.info(f"Successfully ingested data for date: ${dump_date}")
 

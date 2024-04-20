@@ -11,7 +11,7 @@ logging.basicConfig(
     level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
 )
 
-ROOT_DIR = os.path.dirname(__file__)
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 SUCCESS_FILE_DIR = os.path.join(ROOT_DIR, os.environ.get("SUCCESS_FILE_DIR", "success"))
 ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "http://localhost:9200")
@@ -169,7 +169,6 @@ def remove_dump_files():
 
 # check if success file exits, if so exit early
 def main():
-    print(ROOT_DIR)
     dump_date = get_dump_date()
     logging.info(f"Starting ingest for date: {dump_date}")
     # don't re-ingest if already ingested

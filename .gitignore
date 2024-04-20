@@ -162,4 +162,4 @@ cython_debug/
 #wikiquote raw data dump
 wikiquote.json
 chunks/
-ingest/success_*
+ingest/success/

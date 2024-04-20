@@ -10,6 +10,9 @@ logging.basicConfig(
     format="%(levelname)s: %(message)s",
     level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
 )
+SUCCESS_FILE_DIR = os.environ.get(
+    "SUCCESS_FILE_DIR", os.path.join(os.path.dirname(__file__), "success")
+)
 ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "https://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
@@ -27,6 +30,13 @@ def get_dump_date():
     # todo, use env variable or if not set find last good backup from wikimedia.
     logging.info("Loading dump date...")
     return os.environ.get("DUMP_DATE", "20240415")
+
+
+def already_ingested(dump_date):
+    """Returns true if this has already ingested the dump for the date"""
+    success_file_path = os.path.join(SUCCESS_FILE_DIR, f"success_{dump_date}")
+    logger.info(f"Checking if already imported dump: {success_file_path}")
+    return os.path.isfile(success_file_path)
 
 
 def elastic_server_running():
@@ -149,10 +159,22 @@ def bulk_load_into_elastic():
     )
 
 
+def save_success(dump_date):
+    """Writes a success file so the ingest won't occur again for this date"""
+    success_file_path = os.path.join(SUCCESS_FILE_DIR, f"success_{dump_date}")
+    logger.debug(f"Saving success file: {success_file_path}")
+    os.makedirs(os.path.dirname(success_file_path), exist_ok=True)
+    open(success_file_path, "w").close()
+
+
 # check if success file exits, if so exit early
 def main():
     dump_date = get_dump_date()
     logging.info(f"Starting ingest for date: {dump_date}")
+    # don't re-ingest if already ingested
+    if already_ingested(dump_date):
+        logging.info(f"Successfully ingested data for dump date: {dump_date}")
+        return
     # can't ingest data if the server isn't running
     if not elastic_server_running():
         logging.error("Failed to connect to elasticsearch server")
@@ -160,7 +182,9 @@ def main():
     download_wikiquote_dump(dump_date)
     split_dump_file()
     create_index()
-    bulk_load_into_elastic()
+    # bulk_load_into_elastic()
+    save_success(dump_date)
+    logger.info(f"Successfully ingested data for date: ${dump_date}")
 
 
 if __name__ == "__main__":

@@ -223,14 +223,13 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
-      # - xpack.security.enrollment.enabled
     mem_limit: 1073741824
     ulimits:
       memlock:
         soft: -1
         hard: -1
     healthcheck:
-      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:9200/
+      test: curl --fail --silent localhost:9200/_cluster/health?filter_path=status | grep -q "green\|yellow"
       interval: 10s
       timeout: 10s
       retries: 120

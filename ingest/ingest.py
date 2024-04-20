@@ -17,8 +17,9 @@ SUCCESS_FILE_DIR = os.environ.get(
 ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "https://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
-WIKI_DUMP_URL_TEMPLATE = os.environ.get(
-    "WIKIQUOTE_DUMP_URL_TEMPLATE",
+DUMP_DATE = os.environ.get("DUMP_DATE", "20240415")
+DUMP_URL_TEMPLATE = os.environ.get(
+    "DUMP_URL_TEMPLATE",
     # "https://dumps.wikimedia.org/other/cirrussearch/{date}/etwikimedia-{date}-cirrussearch-general.json.gz",
     "https://dumps.wikimedia.org/other/cirrussearch/{date}/enwikiquote-{date}-cirrussearch-content.json.gz",
 )
@@ -28,9 +29,9 @@ CHUNKS_DIR = "chunks"
 
 def get_dump_date():
     """Returns the date of the wikiquote dump to load"""
-    # todo, use env variable or if not set find last good backup from wikimedia.
+    # todo, if not set, search and use last good backup from wikimedia.
     logging.info("Loading dump date...")
-    return os.environ.get("DUMP_DATE", "20240415")
+    return DUMP_DATE
 
 
 def already_ingested(dump_date):
@@ -57,7 +58,7 @@ def download_wikiquote_dump(dump_date):
         logging.info(f"Skipping wikiquote dump download, file already exists.")
         return
     logging.info(f"Downloading wikiquote dump file.")
-    url = str.format(WIKI_DUMP_URL_TEMPLATE, date=dump_date)
+    url = str.format(DUMP_URL_TEMPLATE, date=dump_date)
     archive_file_path = f"{DUMP_FILE_PATH}.gz"
     # download the archive
     with requests.get(url, stream=True) as r:

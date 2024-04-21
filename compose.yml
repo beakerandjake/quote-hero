@@ -58,5 +58,5 @@ services:
       - ingest:/ingest/success
 volumes:
   elastic:
-  kibana:
+  # kibana:
   ingest:

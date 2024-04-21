@@ -8,9 +8,13 @@ ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
 client = Elasticsearch(ELASTIC_SERVER_URL)
 
 
-def num_docs():
+def get_stats():
     """Returns the total number of documents"""
-    return client.count(index=ELASTIC_INDEX)["count"]
+    result = client.indices.stats(index=ELASTIC_INDEX)
+    return {
+        "number_of_docs": result["_all"]["primaries"]["docs"]["count"],
+        "size_in_bytes": result["_all"]["primaries"]["store"]["size_in_bytes"],
+    }
 
 
 def _map_results(results):

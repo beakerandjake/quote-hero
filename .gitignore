@@ -167,4 +167,4 @@ ingest/chunks/
 ingest/success/
 
 # api specific files
-words.txt
+api/data/

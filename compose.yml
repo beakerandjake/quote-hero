@@ -56,7 +56,17 @@ services:
       - DUMP_DATE=20240415
     volumes:
       - ingest:/ingest/success
+  api:
+    build: api
+    container_name: api
+    depends_on:
+      elastic:
+        contiditon: service_healthy
+    environment:
+    volumes:
+      - api:/api/data
 volumes:
   elastic:
   # kibana:
   ingest:
+  api:

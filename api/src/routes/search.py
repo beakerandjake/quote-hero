@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
+from ..util import elastic
 
 
 router = APIRouter()
@@ -18,3 +19,8 @@ class Query(BaseModel):
 async def search(query: Query):
     """Searches for pages which match the given words"""
     return f"You searched for: {query.terms}"
+
+
+@router.get("/search")
+async def test():
+    return elastic.test_query()

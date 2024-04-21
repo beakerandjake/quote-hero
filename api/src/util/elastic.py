@@ -25,7 +25,7 @@ def search_exact(terms: list[str]):
     """Returns all documents which match the terms exactly"""
     results = client.search(
         index=ELASTIC_INDEX,
-        query={"match_phrase": {"text": " ".join(terms)}},
+        query={"match_phrase": {"text": {"query": " ".join(terms), "slop": 4}}},
         source=["title", "page_id"],
     )
     return _map_results(results)

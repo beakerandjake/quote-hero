@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "./components/Button";
 import { getWord, search } from "./services/api.js";
+import { Results } from "./components/Results.jsx";
 
 export const App = () => {
   const [words, setWords] = useState([]);
@@ -54,7 +55,7 @@ export const App = () => {
             </div>
           )}
           {/* Results */}
-          {!!results && <div>{JSON.stringify(results)}</div>}
+          {!!results && <Results results={results} />}
         </div>
       </main>
     </div>

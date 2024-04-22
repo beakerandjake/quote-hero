@@ -3,6 +3,7 @@ import { Button } from "./components/Button";
 import { getWord, search } from "./services/api.js";
 import { Results } from "./components/Results.jsx";
 import { Words } from "./components/Words.jsx";
+import { PageHeader } from "./components/PageHeader.jsx";
 
 export const App = () => {
   const [words, setWords] = useState([]);
@@ -29,20 +30,13 @@ export const App = () => {
     <div className="min-h-full">
       <main className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
         {/* Title */}
-        <div className="text-center">
-          <h1 className="text-4xl font-bold leading-tight tracking-tight text-gray-900 lg:text-6xl dark:text-white">
-            QuoteMaster <span className="pl-1">💬</span>
-          </h1>
-          <div className="text-md mt-3 text-gray-500 md:text-xl  dark:text-slate-400">
-            How many pages can you match?
-          </div>
-        </div>
+        <PageHeader />
         {/* Content */}
-        <div className="mt-10 flex flex-col items-center gap-5">
+        <div className="mt-4 flex flex-col items-center gap-5">
           {/* Add New Word */}
           <Button onClick={onAddWord}>Add Word</Button>
           {/* Word List */}
-          <div className="border- w-full">
+          <div className="flex w-full justify-center">
             <Words words={words} />
           </div>
           {/* Submit Buttons */}

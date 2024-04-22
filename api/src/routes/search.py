@@ -1,12 +1,12 @@
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
+from pydantic import Field
 from ..util import elastic
-
+from ..models import CamelCaseModel
 
 router = APIRouter()
 
 
-class Query(BaseModel):
+class Query(CamelCaseModel):
     terms: list[str] = Field(min_items=1)
     exact: bool
 

@@ -13,10 +13,6 @@
       },
       "text": {
         "type": "text"
-      },
-      "popularity_score": {
-        "type": "double",
-        "index": false
       }
     }
   }

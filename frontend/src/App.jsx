@@ -28,15 +28,19 @@ export const App = () => {
 
   return (
     <div className="min-h-full">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8 lg:py-24">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10">
         {/* Title */}
         <PageHeader />
         {/* Content */}
         <div className="mt-4 flex flex-col items-center gap-5">
           {/* Add New Word */}
           <div className="flex gap-4">
-            <Button onClick={onAddWord}>Add Word</Button>
-            <Button onClick={onReset}>Reset</Button>
+            <Button disabled={!!results} onClick={onAddWord}>
+              Add Word
+            </Button>
+            <Button disabled={!words.length} onClick={onReset}>
+              Reset
+            </Button>
           </div>
           {/* Word List */}
           <div className="flex w-full justify-center">
@@ -44,8 +48,12 @@ export const App = () => {
           </div>
           {/* Submit Buttons */}
           <div className="flex gap-4">
-            <Button onClick={() => onSubmit(true)}>Go (easy)</Button>
-            <Button onClick={() => onSubmit(false)}>Go (hard)</Button>
+            <Button disabled={!words.length} onClick={() => onSubmit(true)}>
+              Go (easy)
+            </Button>
+            <Button disabled={words.length < 2} onClick={() => onSubmit(false)}>
+              Go (hard)
+            </Button>
           </div>
           {/* Results */}
           {!!results && <Results results={results} />}

@@ -77,6 +77,19 @@ def download_wikiquote_dump(dump_date):
     os.remove(archive_file_path)
 
 
+def _get_document_keys():
+    """Returns the set of keys to load from each document."""
+    # use the index settings to determine which keys to load.
+    with open(ELASTIC_INDEX_SETTINGS_PATH) as settings:
+        document_keys = set(json.load(settings)["mappings"]["properties"].keys())
+        if not document_keys:
+            raise RuntimeError(
+                f"Could not load properties from index settings: {ELASTIC_INDEX_SETTINGS_PATH}"
+            )
+        logger.debug(f"Extracting keys: {list(document_keys)} from data dump")
+        return document_keys
+
+
 def split_dump_file():
     """Splits the wikiquote dump file into chunks"""
     if os.path.isdir("chunks"):
@@ -86,21 +99,20 @@ def split_dump_file():
     lines_per_chunk = 500
     num_chunks = 1
     current_chunk_file = None
-    document_keys = {}
-    # load the keys specified by the index settings.
-    with open(ELASTIC_INDEX_SETTINGS_PATH) as settings:
-        document_keys = set(json.load(settings)["mappings"]["properties"].keys())
-        if not document_keys:
-            raise RuntimeError(
-                f"Could not load properties from index settings: {ELASTIC_INDEX_SETTINGS_PATH}"
-            )
-        logger.debug(f"Extracting keys: {list(document_keys)} from data dump")
+    document_keys = _get_document_keys()
     # ensure chunks dir exists before attempt to write to it.
     os.mkdir(CHUNKS_DIR)
     with open(DUMP_FILE_PATH) as dump_file:
-        for i, line in enumerate(dump_file):
-            # write out current chunk file and start a new one.
-            if i % lines_per_chunk == 0:
+        line_num = 0
+        # read every two lines from the file
+        while True:
+            raw_metadata = dump_file.readline()
+            raw_data = dump_file.readline()
+            # eof
+            if not raw_metadata or not raw_data:
+                break
+            # attempt to write out current chunk file and start a new one.
+            if line_num % lines_per_chunk == 0:
                 # finish with current chunk file.
                 if current_chunk_file:
                     num_chunks += 1
@@ -108,20 +120,20 @@ def split_dump_file():
                 # start new chunk file.
                 new_chunk_file_path = os.path.join(CHUNKS_DIR, f"chunk_{num_chunks}")
                 current_chunk_file = open(new_chunk_file_path, "w")
-            formatted = None
-            # expect even lines are for metadata
-            if i % 2 == 0:
-                formatted = json.dumps(
-                    {"index": {"_id": json.loads(line)["index"]["_id"]}}
+            # write out the metadata and data lines to the chunk file
+            try:
+                # generate the metadata line and write to the current chunk file
+                metadata = json.dumps(
+                    {"index": {"_id": json.loads(raw_metadata)["index"]["_id"]}}
                 )
-            # expect odd lines are for documents
-            else:
-                line_json = json.loads(line)
-                formatted = json.dumps(
-                    {key: line_json.get(key) for key in document_keys}
-                )
-            # write the formatted line to the current chunk file
-            current_chunk_file.write(formatted + "\n")
+                current_chunk_file.write(metadata + "\n")
+                # generate the data line and write to the current chunk file
+                data_json = json.loads(raw_data)
+                data = json.dumps({key: data_json[key] for key in document_keys})
+                current_chunk_file.write(data + "\n")
+            except KeyError:
+                logger.warn(f"Failed to parse document at line: {line_num}")
+            line_num += 2
     # ensure final chunk in progress in closed
     if current_chunk_file:
         current_chunk_file.close()

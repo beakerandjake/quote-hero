@@ -101,9 +101,11 @@ def split_dump_file():
         for i, line in enumerate(dump_file):
             # write out current chunk file and start a new one.
             if i % lines_per_chunk == 0:
+                # finish with current chunk file.
                 if current_chunk_file:
                     num_chunks += 1
                     current_chunk_file.close()
+                # start new chunk file.
                 new_chunk_file_path = os.path.join(CHUNKS_DIR, f"chunk_{num_chunks}")
                 current_chunk_file = open(new_chunk_file_path, "w")
             formatted = None

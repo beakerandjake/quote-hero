@@ -30,7 +30,7 @@ export const App = () => {
       <main className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold lg:text-6xl">
+          <h1 className="text-4xl font-bold leading-tight tracking-tight text-gray-900 lg:text-6xl dark:text-white">
             QuoteMaster <span className="pl-1">💬</span>
           </h1>
           <div className="text-md mt-3 text-gray-500 md:text-xl  dark:text-slate-400">
@@ -42,7 +42,7 @@ export const App = () => {
           {/* Add New Word */}
           <Button onClick={onAddWord}>Add Word</Button>
           {/* Word List */}
-          <div className="w-full border-">
+          <div className="border- w-full">
             <Words words={words} />
           </div>
           {/* Submit Buttons */}

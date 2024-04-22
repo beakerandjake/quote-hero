@@ -34,19 +34,19 @@ export const App = () => {
         {/* Content */}
         <div className="mt-4 flex flex-col items-center gap-5">
           {/* Add New Word */}
-          <Button onClick={onAddWord}>Add Word</Button>
+          <div className="flex gap-4">
+            <Button onClick={onAddWord}>Add Word</Button>
+            <Button onClick={onReset}>Reset</Button>
+          </div>
           {/* Word List */}
           <div className="flex w-full justify-center">
             <Words words={words} />
           </div>
           {/* Submit Buttons */}
-          {!!words.length && (
-            <div className="flex gap-4">
-              <Button onClick={() => onSubmit(true)}>Go (easy)</Button>
-              <Button onClick={() => onSubmit(false)}>Go (hard)</Button>
-              <Button onClick={onReset}>Reset</Button>
-            </div>
-          )}
+          <div className="flex gap-4">
+            <Button onClick={() => onSubmit(true)}>Go (easy)</Button>
+            <Button onClick={() => onSubmit(false)}>Go (hard)</Button>
+          </div>
           {/* Results */}
           {!!results && <Results results={results} />}
         </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "./components/Button";
 import { getWord, search } from "./services/api.js";
 import { Results } from "./components/Results.jsx";
+import { Words } from "./components/Words.jsx";
 
 export const App = () => {
   const [words, setWords] = useState([]);
@@ -41,11 +42,9 @@ export const App = () => {
           {/* Add New Word */}
           <Button onClick={onAddWord}>Add Word</Button>
           {/* Word List */}
-          <ul className="list-disc">
-            {words.map((word, i) => (
-              <li key={i}>{word}</li>
-            ))}
-          </ul>
+          <div className="w-full border-">
+            <Words words={words} />
+          </div>
           {/* Submit Buttons */}
           {!!words.length && (
             <div className="flex gap-4">

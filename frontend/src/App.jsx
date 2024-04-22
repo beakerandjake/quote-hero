@@ -4,6 +4,7 @@ import { getWord, search } from "./services/api.js";
 import { Results } from "./components/Results.jsx";
 import { Words } from "./components/Words.jsx";
 import { PageHeader } from "./components/PageHeader.jsx";
+import { SubmitControls } from "./components/SubmitControls.jsx";
 
 export const App = () => {
   const [words, setWords] = useState([]);
@@ -38,23 +39,20 @@ export const App = () => {
             <Button disabled={!!results} onClick={onAddWord}>
               Add Word
             </Button>
-            <Button disabled={!words.length} onClick={onReset}>
-              Reset
-            </Button>
+            {!!words.length && (
+              <Button disabled={!words.length} onClick={onReset}>
+                Reset
+              </Button>
+            )}
           </div>
           {/* Word List */}
           <div className="flex w-full justify-center">
             <Words words={words} />
           </div>
           {/* Submit Buttons */}
-          <div className="flex gap-4">
-            <Button disabled={!words.length} onClick={() => onSubmit(true)}>
-              Go (easy)
-            </Button>
-            <Button disabled={words.length < 2} onClick={() => onSubmit(false)}>
-              Go (hard)
-            </Button>
-          </div>
+          {!!words.length && !results && (
+            <SubmitControls wordCount={words.length} onSubmit={onSubmit} />
+          )}
           {/* Results */}
           {!!results && <Results results={results} />}
         </div>

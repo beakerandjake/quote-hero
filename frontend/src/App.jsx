@@ -1,13 +1,26 @@
 import { useState } from "react";
 import { Button } from "./components/Button";
-import { getWord } from "./services/api.js";
+import { getWord, search } from "./services/api.js";
 
 export const App = () => {
   const [words, setWords] = useState([]);
+  const [results, setResults] = useState(null);
 
-  const addWord = async () => {
+  const onAddWord = async () => {
     const word = await getWord();
     setWords((prev) => [...prev, word]);
+  };
+
+  const onReset = () => {
+    setWords([]);
+    setResults(null);
+  };
+
+  const onSubmit = async (easy) => {
+    if (!words.length) {
+      return;
+    }
+    setResults(await search(words, easy));
   };
 
   return (
@@ -23,9 +36,25 @@ export const App = () => {
           </div>
         </div>
         {/* Content */}
-        <div className="mt-10 flex flex-col">
-          <Button onClick={addWord}>Hello World</Button>
-          <div>[{words.join(",")}]</div>
+        <div className="mt-10 flex flex-col items-center gap-5">
+          {/* Add New Word */}
+          <Button onClick={onAddWord}>Add Word</Button>
+          {/* Word List */}
+          <ul className="list-disc">
+            {words.map((word, i) => (
+              <li key={i}>{word}</li>
+            ))}
+          </ul>
+          {/* Submit Buttons */}
+          {!!words.length && (
+            <div className="flex gap-4">
+              <Button onClick={() => onSubmit(true)}>Go (easy)</Button>
+              <Button onClick={() => onSubmit(false)}>Go (hard)</Button>
+              <Button onClick={onReset}>Reset</Button>
+            </div>
+          )}
+          {/* Results */}
+          {!!results && <div>{JSON.stringify(results)}</div>}
         </div>
       </main>
     </div>

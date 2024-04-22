@@ -30,5 +30,5 @@ class Result(CamelCaseModel):
 async def search(query: Query) -> Result:
     """Searches for pages which match the given words"""
     if query.exact:
-        return Result(elastic.search_exact(query.terms))
+        return Result(**elastic.search_exact(query.terms))
     return Result(**elastic.search_fuzzy(query.terms))

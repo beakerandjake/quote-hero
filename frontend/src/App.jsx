@@ -34,16 +34,14 @@ export const App = () => {
         <PageHeader />
         {/* Content */}
         <div className="mt-4 flex flex-col items-center gap-5">
-          {/* Add New Word */}
+          {/* Words controls */}
           <div className="flex gap-4">
             <Button disabled={!!results} onClick={onAddWord}>
               Add Word
             </Button>
-            {!!words.length && (
-              <Button disabled={!words.length} onClick={onReset}>
-                Reset
-              </Button>
-            )}
+            <Button disabled={!words.length} onClick={onReset}>
+              Reset
+            </Button>
           </div>
           {/* Word List */}
           <div className="flex w-full justify-center">
@@ -53,7 +51,7 @@ export const App = () => {
           {!!words.length && !results && (
             <SubmitControls wordCount={words.length} onSubmit={onSubmit} />
           )}
-          {/* Results */}
+          {/* Results Display */}
           {!!results && <Results results={results} />}
         </div>
       </main>

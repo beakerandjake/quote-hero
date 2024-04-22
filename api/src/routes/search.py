@@ -16,9 +16,19 @@ class Query(CamelCaseModel):
         str_max_length = 50
 
 
+class Hit(CamelCaseModel):
+    page_id: int
+    title: str
+
+
+class Result(CamelCaseModel):
+    total: int
+    top: list[Hit]
+
+
 @router.post("/search")
-async def search(query: Query):
+async def search(query: Query) -> Result:
     """Searches for pages which match the given words"""
     if query.exact:
-        return elastic.search_exact(query.terms)
-    return elastic.search_fuzzy(query.terms)
+        return Result(elastic.search_exact(query.terms))
+    return Result(**elastic.search_fuzzy(query.terms))

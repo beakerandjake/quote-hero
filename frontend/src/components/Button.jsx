@@ -1,3 +1,6 @@
+/**
+ * Basic button component
+ */
 export const Button = ({ children, ...props }) => (
   <button
     {...props}

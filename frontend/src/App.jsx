@@ -5,26 +5,66 @@ import { Results } from "./components/Results.jsx";
 import { Words } from "./components/Words.jsx";
 import { PageHeader } from "./components/PageHeader.jsx";
 import { SubmitControls } from "./components/SubmitControls.jsx";
+import { HighScores } from "./components/HighScores.jsx";
 
 export const App = () => {
   const [words, setWords] = useState([]);
   const [results, setResults] = useState(null);
+  const [highScores, setHighScores] = useState({
+    easy: {
+      wordCount: 0,
+      matchCount: 0,
+    },
+    hard: {
+      wordCount: 0,
+      matchCount: 0,
+    },
+  });
 
+  // gets a random word from the api and adds it to our word collection
   const onAddWord = async () => {
     const word = await getWord();
     setWords((prev) => [...prev, word]);
   };
 
+  // clears the current words and results.
   const onReset = () => {
     setWords([]);
     setResults(null);
   };
 
+  // update the high scores if beat the records.
+  const tryToUpdateHighScores = (matches, easy) => {
+    const scoreKey = easy ? "easy" : "hard";
+    const best = highScores[scoreKey];
+    // bail if didn't have any matches or didn't beat word count.
+    if (matches < 1 || words.length < best.wordCount) {
+      return;
+    }
+    // bail if didn't beat match count.
+    if (words.length === best.wordCount && matches <= best.matchCount) {
+      return;
+    }
+    // beat the high score by either number of words or same words but better match count.
+    setHighScores({
+      ...highScores,
+      ...{
+        [scoreKey]: {
+          wordCount: words.length,
+          matchCount: matches,
+        },
+      },
+    });
+  };
+
+  // searches with the current words
   const onSubmit = async (easy) => {
     if (!words.length) {
       return;
     }
-    setResults(await search(words, easy));
+    const results = await search(words, easy);
+    setResults(results);
+    tryToUpdateHighScores(results.total, easy);
   };
 
   return (
@@ -51,8 +91,12 @@ export const App = () => {
           {!!words.length && !results && (
             <SubmitControls wordCount={words.length} onSubmit={onSubmit} />
           )}
-          {/* Results Display */}
+          {/* Results */}
           {!!results && <Results results={results} />}
+          {/* High Scores */}
+          {(!!highScores.easy.wordCount || !!highScores.hard.wordCount) && (
+            <HighScores highScores={highScores} />
+          )}
         </div>
       </main>
     </div>

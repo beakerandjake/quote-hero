@@ -39,7 +39,7 @@ export const Results = ({ results }) => {
       <h3 className="mb-1 text-lg text-gray-500 dark:text-slate-400">
         Top Results
       </h3>
-      {/* List of links to the top pages */}
+      {/* Links to the top pages */}
       <ul role="list">
         {results.top.map(({ pageId, title }) => (
           <li

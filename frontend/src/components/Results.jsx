@@ -36,7 +36,7 @@ export const Results = ({ results }) => {
       <ul role="list">
         {results.top.map(({ pageId, title }) => (
           <li
-            className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+            className="text-blue-600 hover:underline dark:text-blue-500"
             key={pageId}
           >
             <a href={`https://en.wikiquote.org/?curid=${pageId}`}>{title}</a>

@@ -69,7 +69,7 @@ export const App = () => {
 
   return (
     <div className="min-h-full">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {/* Title */}
         <PageHeader />
         {/* Content */}

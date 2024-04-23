@@ -1,13 +1,17 @@
 import { Card } from "./Card";
 
+// adds 's' to end of string if necessary
+const pluralize = (str, count) => (count > 1 ? `${str}s` : str);
+
 /**
  * Displays information about a high score.
  */
 const HighScore = ({ name, wordCount, matchCount }) => {
+  const score = `Used ${wordCount.toLocaleString()} ${pluralize("word", wordCount)}, matched ${matchCount.toLocaleString()} ${pluralize("page", matchCount)}.`;
   return (
-    <span className="dark:text-white">
-      {name} - words: {wordCount}, matches: {matchCount}
-    </span>
+    <div className="text-gray-500 dark:text-slate-400">
+      <span className="text-lg font-semibold">{name}</span>: {score}
+    </div>
   );
 };
 
@@ -17,9 +21,18 @@ const HighScore = ({ name, wordCount, matchCount }) => {
 export const HighScores = ({ highScores }) => {
   return (
     <Card>
-      <div className="flex gap-3">
-        <HighScore name="Fuzzy" {...highScores.easy} />
-        <HighScore name="Exact" {...highScores.hard} />
+      <div className="flex flex-col gap-2">
+        <h3 className="text-center text-2xl font-medium leading-6 text-gray-900 dark:text-white">
+          High Scores
+        </h3>
+        <div>
+          {highScores.easy.wordCount > 0 && (
+            <HighScore name="Fuzzy" {...highScores.easy} />
+          )}
+          {highScores.hard.wordCount > 0 && (
+            <HighScore name="Exact" {...highScores.hard} />
+          )}
+        </div>
       </div>
     </Card>
   );

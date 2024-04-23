@@ -2,7 +2,12 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        wikimedia: "#36c",
+        "wikimedia-light": "#447ff5",
+      },
+    },
   },
   plugins: [],
 };

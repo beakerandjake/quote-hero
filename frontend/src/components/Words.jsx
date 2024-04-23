@@ -1,23 +1,17 @@
 import { Word } from "./Word";
-
-/**
- * Container for words display
- */
-const Card = ({ children }) => (
-  <div className="relative inline-flex min-w-64 flex-wrap justify-center gap-3 rounded-lg border border-slate-300 p-5 shadow dark:border-gray-700">
-    {children}
-  </div>
-);
+import { Card } from "./Card";
 
 /**
  * Component rendered when no words have been selected.
  */
 const NoWords = () => (
-  <Card>
-    <div className="text-center dark:text-white">
-      <p>Add a word to get started.</p>
-    </div>
-  </Card>
+  <div className="min-w-64">
+    <Card>
+      <div className="text-center dark:text-white">
+        <p>Add a word to get started.</p>
+      </div>
+    </Card>
+  </div>
 );
 
 /**
@@ -28,7 +22,7 @@ export const Words = ({ words }) => {
     return <NoWords />;
   }
   return (
-    <Card>
+    <Card className="inline-flex min-w-64 flex-wrap justify-center gap-3">
       {words.map((word, i) => (
         <Word word={word} key={i} />
       ))}

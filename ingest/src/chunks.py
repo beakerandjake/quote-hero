@@ -5,30 +5,34 @@ import json
 
 logger = logging.getLogger(__name__)
 
+LINES_PER_CHUNK = 500
+
 
 def chunk_dump_file(src_file_path: str, dest_dir: str, keys: dict):
     """Splits a wikiquote dump file into many separate chunk files"""
+    # don't re-chunk file if already been chunked.
     if os.path.isdir("chunks"):
         logger.info("Skipping dump file chunking, chunk directory already exists.")
         return
-    logger.info("Splitting dump file into chunks")
-    lines_per_chunk = 500
+    logger.info("Splitting dump file into chunks.")
     num_chunks = 1
     current_chunk_file = None
     # ensure chunks dir exists before attempt to write to it.
     os.makedirs(dest_dir, exist_ok=True)
+    # iterate the src file, writing chunk files every x lines.
     with open(src_file_path) as dump_file:
         line_num = 0
         # read every two lines from the file
         while True:
+            # need to read file two lines at a time
             raw_metadata = dump_file.readline()
             raw_data = dump_file.readline()
             # eof
             if not raw_metadata or not raw_data:
                 break
-            # attempt to write out current chunk file and start a new one.
-            if line_num % lines_per_chunk == 0:
-                # finish with current chunk file.
+            # write out current chunk file and start a new one if wrote enough lines.
+            if line_num % LINES_PER_CHUNK == 0:
+                # finished with current chunk file.
                 if current_chunk_file:
                     num_chunks += 1
                     current_chunk_file.close()

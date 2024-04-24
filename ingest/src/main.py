@@ -177,7 +177,6 @@ def main():
         exit(1)
     wikiquote.download(dump_info, LOCAL_DUMP_FILE_PATH)
     chunks.chunk_dump_file(LOCAL_DUMP_FILE_PATH, CHUNKS_DIR, _get_index_keys())
-    # split_dump_file()
     # create_index()
     # bulk_load_into_elastic()
     # remove_dump_files()

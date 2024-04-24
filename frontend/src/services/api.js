@@ -1,4 +1,5 @@
-// hit localhost when developing locally
+// expect api is running on different port when developing locally
+// when deployed expect api is running on same domain under the /api route
 export const API_ENDPOINT = import.meta.env.PROD
   ? "/api"
   : "http://localhost:3000";

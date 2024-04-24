@@ -44,6 +44,25 @@ services:
       - "3000:80"
     volumes:
       - api:/api/data
+  frontend:
+    build: frontend
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      elastic:
+        condition: service_healthy
+  reverse-proxy:
+    image: nginx:1.25.5-alpine
+    container_name: reverse-proxy
+    ports:
+      - "8080:80"
+    restart: always
+    depends_on:
+      elastic:
+        condition: service_healthy
+    volumes:
+      - ./reverse-proxy/default.conf:/etc/nginx/conf.d/default.conf
 volumes:
   elastic:
   ingest:

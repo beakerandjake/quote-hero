@@ -4,10 +4,6 @@ import json
 import requests
 import shutil
 import gzip
-from bs4 import BeautifulSoup
-import re
-from urllib.parse import urljoin
-from typing import Optional
 import wikiquote_dump
 
 logger = logging.getLogger(__name__)
@@ -16,9 +12,11 @@ logging.basicConfig(
     level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
 )
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+)
 CHUNKS_DIR = os.path.join(ROOT_DIR, "chunks")
-SUCCESS_DIR = os.path.join(ROOT_DIR, os.environ.get("SUCCESS_FILE_DIR", "success"))
+SUCCESS_DIR = os.path.join(ROOT_DIR, "success")
 LOCAL_DUMP_FILE_PATH = os.path.join(ROOT_DIR, "wikiquote.json")
 ELASTIC_INDEX_CONFIG_PATH = os.path.join(ROOT_DIR, "index_settings.json")
 
@@ -26,27 +24,12 @@ ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
 ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "http://localhost:9200")
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
 
-WIKIQUOTE_DUMP_DATE_OVERRIDE = os.environ.get("WIKIQUOTE_DUMP_DATE_OVERRIDE")
-WIKIQUOTE_DUMP_ROOT_URL = os.environ.get(
-    "WIKIQUOTE_DUMP_ROOT_URL",
-    "https://dumps.wikimedia.org/other/cirrussearch/",
-)
-WIKIQUOTE_DUMP_FILENAME_REGEXP = re.compile(
-    os.environ.get(
-        "WIKIQUOTE_DUMP_FILENAME_REGEXP",
-        r"enwikiquote-[\d]{8}-cirrussearch-content.json.gz",
-    )
-)
-WIKIQUOTE_DUMP_FILENAME_TEMPLATE = os.environ.get(
-    "WIKIQUOTE_DUMP_FILENAME_TEMPLATE",
-)
 
-
-# def already_ingested(dump_date):
-#     """Returns true if this has already ingested the dump for the date"""
-#     success_file_path = os.path.join(SUCCESS_DIR, f"success_{dump_date}")
-#     logger.info(f"Checking if already imported dump: {success_file_path}")
-#     return os.path.isfile(success_file_path)
+def _already_ingested(dump_date):
+    """Returns true if this has already ingested the dump for the date"""
+    success_file_path = os.path.join(SUCCESS_DIR, f"success_{dump_date}")
+    logger.info(f"Checking if already imported dump: {success_file_path}")
+    return os.path.isfile(success_file_path)
 
 
 # def elastic_server_running():
@@ -208,10 +191,10 @@ WIKIQUOTE_DUMP_FILENAME_TEMPLATE = os.environ.get(
 def main():
     dump_info = wikiquote_dump.get_dump_info()
     logging.info(f"Starting ingest for date: {dump_info}")
-    # # don't re-ingest if already ingested
-    # if already_ingested(dump_date):
-    #     logging.info(f"Successfully ingested data for dump date: {dump_date}")
-    #     return
+    # don't re-ingest if already ingested
+    if _already_ingested(dump_info.date):
+        logging.info(f"Successfully ingested data for dump date: {dump_info.date}")
+        return
     # # can't ingest data if the server isn't running
     # if not elastic_server_running():
     #     logging.error("Failed to connect to elasticsearch server")

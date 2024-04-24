@@ -1,8 +1,19 @@
-# React + Vite
+# frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend service allows you to play the quotemaster game.
 
-Currently, two official plugins are available:
+Built with `react`, `vite`, and `tailwindcss`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Usage
+
+This application depends on the api container, and is intended to be ran through docker compose.
+
+At the root of the repo run:
+
+```sh
+docker compose up -d
+```
+
+After all containers have started, navigate to `http://localhost:8080` in your browser.
+
+**NOTE**: The frontend runs in its own container and listens on the internal docker compose network on port 80 (by default). It is exposed to the host machine via a separate container called `reverse-proxy` which is exposed at `localhost:8080` (by default).

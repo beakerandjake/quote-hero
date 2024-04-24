@@ -5,6 +5,7 @@ import requests
 import shutil
 import gzip
 import wikiquote
+import chunks
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -43,17 +44,17 @@ def _elastic_server_running() -> bool:
         return False
 
 
-# def _get_document_keys():
-#     """Returns the set of keys to load from each document."""
-#     # use the index settings to determine which keys to load.
-#     with open(ELASTIC_INDEX_SETTINGS_PATH) as settings:
-#         document_keys = set(json.load(settings)["mappings"]["properties"].keys())
-#         if not document_keys:
-#             raise RuntimeError(
-#                 f"Could not load properties from index settings: {ELASTIC_INDEX_SETTINGS_PATH}"
-#             )
-#         logger.debug(f"Extracting keys: {list(document_keys)} from data dump")
-#         return document_keys
+def _get_index_keys():
+    """Returns the set of keys to load from each document in the dump."""
+    # use the index settings to determine which keys to load.
+    with open(ELASTIC_INDEX_CONFIG_PATH) as settings:
+        document_keys = set(json.load(settings)["mappings"]["properties"].keys())
+        if not document_keys:
+            raise RuntimeError(
+                f"Could not load properties from index settings: {ELASTIC_INDEX_CONFIG_PATH}"
+            )
+        logger.debug(f"Extracting index keys: {list(document_keys)} from dump.")
+        return document_keys
 
 
 # def split_dump_file():
@@ -175,6 +176,7 @@ def main():
         logging.error("Failed to connect to elasticsearch server")
         exit(1)
     wikiquote.download(dump_info, LOCAL_DUMP_FILE_PATH)
+    chunks.chunk_dump_file(LOCAL_DUMP_FILE_PATH, CHUNKS_DIR, _get_index_keys())
     # split_dump_file()
     # create_index()
     # bulk_load_into_elastic()

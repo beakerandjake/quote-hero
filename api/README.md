@@ -6,6 +6,8 @@ Built with `FastApi`.
 
 ## Routes
 
+**NOTE**: When you run this service via docker compose these routes are accessible at `localhost:8080/api`. This is because the service is behind the `reverse-proxy` service. Using the reverse proxy removes the need for cors.
+
 ### /docs
 
 The Swagger docs for the API.
@@ -35,10 +37,8 @@ docker compose up -d
 After all the containers have started up you can verify the api is serving data by running:
 
 ```sh
-curl localhost:3000/words
+curl localhost:8080/api/words
 ```
-
-**NOTE**: The api runs in its own container and is exposed to the host machine on port 3000. It also listens on the internal docker compose network on port 80. The frontend application queries the API via the `reverse-proxy` service which is exposed at `localhost:8080` (by default).
 
 ## Local Development
 

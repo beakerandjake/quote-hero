@@ -16,4 +16,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY --from=get_words /words/words.txt data/
 COPY src src
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80", "--root-path", "/api"]

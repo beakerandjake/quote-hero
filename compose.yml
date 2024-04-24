@@ -39,8 +39,6 @@ services:
         condition: service_completed_successfully
     environment:
       - ELASTIC_SERVER_URL=http://elastic:9200
-    ports:
-      - "3000:80"
     volumes:
       - api:/api/data
   frontend:

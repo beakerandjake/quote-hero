@@ -22,7 +22,7 @@ export const Results = ({ results }) => {
     <Card>
       {/* Header */}
       <div className="mb-2">
-        <h1 className="text-2xl font-medium leading-6 text-gray-900 dark:text-white">
+        <h1 className="text-xl md:text-2xl font-medium leading-6 text-gray-900 dark:text-white">
           {results.total === 1
             ? "Found One Match"
             : `Found ${results.total.toLocaleString()} Matches`}
@@ -36,7 +36,7 @@ export const Results = ({ results }) => {
       <ul role="list">
         {results.top.map(({ pageId, title }) => (
           <li
-            className="text-blue-600 hover:underline dark:text-blue-500"
+            className="list-inside list-disc text-blue-600 hover:underline dark:text-blue-500"
             key={pageId}
           >
             <a href={`https://en.wikiquote.org/?curid=${pageId}`}>{title}</a>

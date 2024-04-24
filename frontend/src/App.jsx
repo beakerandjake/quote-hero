@@ -73,7 +73,7 @@ export const App = () => {
         {/* Title */}
         <PageHeader />
         {/* Content */}
-        <div className="mt-4 flex flex-col items-center gap-5">
+        <div className="mt-4 flex flex-col items-center gap-3 md:gap-5">
           {/* Words controls */}
           <div className="flex gap-4">
             <Button disabled={!!results} onClick={onAddWord}>

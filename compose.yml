@@ -29,7 +29,6 @@ services:
     environment:
       - LOG_LEVEL=DEBUG
       - ELASTIC_SERVER_URL=http://elastic:9200
-      - DUMP_DATE=20240415
     volumes:
       - ingest:/ingest/success
   api:

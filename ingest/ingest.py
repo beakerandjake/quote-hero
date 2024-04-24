@@ -17,7 +17,7 @@ logging.basicConfig(
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CHUNKS_DIR = os.path.join(ROOT_DIR, "chunks")
 SUCCESS_DIR = os.path.join(ROOT_DIR, os.environ.get("SUCCESS_FILE_DIR", "success"))
-DUMP_FILE_PATH = os.path.join(ROOT_DIR, "wikiquote.json")
+LOCAL_DUMP_FILE_PATH = os.path.join(ROOT_DIR, "wikiquote.json")
 ELASTIC_INDEX_CONFIG_PATH = os.path.join(ROOT_DIR, "index_settings.json")
 
 ELASTIC_INDEX = os.environ.get("ELASTIC_INDEX", "wikiquote")
@@ -35,6 +35,9 @@ WIKIQUOTE_DUMP_FILENAME_REGEXP = re.compile(
         r"enwikiquote-[\d]{8}-cirrussearch-content.json.gz",
     )
 )
+WIKIQUOTE_DUMP_FILENAME_TEMPLATE = os.environ.get(
+    "WIKIQUOTE_DUMP_FILENAME_TEMPLATE",
+)
 
 
 class WikiquoteDumpInfo:
@@ -48,6 +51,7 @@ class WikiquoteDumpInfo:
 
 def _get_most_recent_dump_dates() -> list[str]:
     """Returns a list of the most recent wikiquote dump dates"""
+    logger.debug("Grabbing list of most recent wikimedia dumps.")
     # query the dump root url, this is a directory index and has a list of links to recent dumps.
     index = requests.get(WIKIQUOTE_DUMP_ROOT_URL)
     index.raise_for_status()
@@ -59,42 +63,53 @@ def _get_most_recent_dump_dates() -> list[str]:
     return [m.group(1) for m in (date_regexp.match(link) for link in links) if m]
 
 
+def _file_name(date):
+    """Returns the expected name of the wikiquote dump file for the specified date"""
+    return f"enwikiquote-{date}-cirrussearch-content.json.gz"
+
+
+def _url_for_date(date):
+    """Returns a url to the directory index of the dump at the specified date"""
+    return urljoin(WIKIQUOTE_DUMP_ROOT_URL, f"{date}/")
+
+
+def _file_url(date):
+    """Returns the url to a wikiquote dump file for the specified date"""
+    return urljoin(_url_for_date(date), _file_name(date))
+
+
 def _find_valid_wikiquote_dump(dates: list[str]) -> WikiquoteDumpInfo:
     """Returns the first date which contains a wikiquote dump"""
     for date in dates:
+        logger.debug(f"Searching dump: {date} for a wikiquote dump.")
         # get the directory index of the dump for this date
-        dump_url = urljoin(WIKIQUOTE_DUMP_ROOT_URL, f"{date}/")
-        r = requests.get(dump_url)
-        if r.status_code != 200:
+        index = requests.get(_url_for_date(date))
+        if index.status_code != 200:
             logger.warn(f"Failed to load dump at date: {date}")
             continue
-        soup = BeautifulSoup(r.text, "html.parser")
+        soup = BeautifulSoup(index.text, "html.parser")
         # get all the links in the directory index
         links = [l.get("href") for l in soup.body.find_all("a")]
-        # try to find the wikiquote dump file (it may not have been generated in this dump)
-        dump_file = next(
-            (link for link in links if WIKIQUOTE_DUMP_FILENAME_REGEXP.match(link)),
-            None,
-        )
-        if dump_file:
-            return WikiquoteDumpInfo(date, urljoin(dump_url, dump_file))
+        # see if this date has the file we need
+        dump_file_name = _file_name(date)
+        if next((l for l in links if l == dump_file_name), None):
+            return WikiquoteDumpInfo(date, _file_url(date))
     # couldn't find a wikiquote dump in any of the dates.
     return None
 
 
-def get_dump_date() -> WikiquoteDumpInfo:
-    """Returns the date of the wikiquote dump to load"""
+def get_dump_info() -> WikiquoteDumpInfo:
+    """Returns the info of the most recent wikiquote dump"""
     # allow manual override
     if WIKIQUOTE_DUMP_DATE_OVERRIDE is not None:
         logger.debug(
             f"Dump date override is set, using date: {WIKIQUOTE_DUMP_DATE_OVERRIDE}"
         )
-        return WIKIQUOTE_DUMP_DATE_OVERRIDE
+        return WikiquoteDumpInfo(
+            WIKIQUOTE_DUMP_DATE_OVERRIDE, _file_url(WIKIQUOTE_DUMP_DATE_OVERRIDE)
+        )
     logging.info("Finding date of last good wikiquote dump.")
-    dates = _get_most_recent_dump_dates()
-    if not dates:
-        raise RuntimeError("Could not find recent dumps from the wikiquote dump index!")
-    return _find_valid_wikiquote_dump(dates)
+    return _find_valid_wikiquote_dump(_get_most_recent_dump_dates())
 
 
 # def already_ingested(dump_date):
@@ -261,8 +276,8 @@ def get_dump_date() -> WikiquoteDumpInfo:
 
 # check if success file exits, if so exit early
 def main():
-    dump_date = get_dump_date()
-    logging.info(f"Starting ingest for date: {dump_date}")
+    dump_info = get_dump_info()
+    logging.info(f"Starting ingest for date: {dump_info}")
     # # don't re-ingest if already ingested
     # if already_ingested(dump_date):
     #     logging.info(f"Successfully ingested data for dump date: {dump_date}")

@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY index_settings.json wikiquote.json .
 COPY src src
 
-CMD [ "python", "src/ingest.py" ]
+CMD [ "python", "src/main.py" ]

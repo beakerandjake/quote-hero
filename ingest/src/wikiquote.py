@@ -1,10 +1,12 @@
 import logging
 import os
 import requests
-from bs4 import BeautifulSoup
+import shutil
+import gzip
 import re
-from urllib.parse import urljoin
 from typing import Optional
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +77,7 @@ def _first_valid_wikiquote_dump(dates: list[str]) -> Optional[WikiquoteDumpInfo]
     return None
 
 
-def get_dump_info() -> Optional[WikiquoteDumpInfo]:
+def get_latest_dump_info() -> Optional[WikiquoteDumpInfo]:
     """Returns the info of the most recent wikiquote dump"""
     # allow manual override
     if WIKIQUOTE_DUMP_DATE_OVERRIDE is not None:
@@ -87,3 +89,28 @@ def get_dump_info() -> Optional[WikiquoteDumpInfo]:
         )
     logging.info("Finding date of last good wikiquote dump.")
     return _first_valid_wikiquote_dump(_get_most_recent_dump_dates())
+
+
+def download(dump_info: WikiquoteDumpInfo, dest: str):
+    """Downloads the elastic search data for wikiquote"""
+    if os.path.isfile(dest):
+        logging.info(f"Skipping wikiquote dump download, file already exists.")
+        return
+    archive_file = _file_name(dump_info.date)
+    logging.info("Downloading wikiquote dump archive.")
+    # download the archive
+    with requests.get(dump_info.url, stream=True) as r:
+        r.raise_for_status()
+        # stream file to disk.
+        with open(archive_file, "wb") as f:
+            for chunk in r.iter_content(2048):
+                if chunk:
+                    f.write(chunk)
+    # unzip the archive
+    logging.debug(f"Unpacking dump file archive: '{archive_file}'.")
+    with gzip.open(archive_file, "rb") as src:
+        with open(dest, "wb") as dest:
+            shutil.copyfileobj(src, dest)
+    # delete the original archive
+    logging.debug(f"Deleting archive file.")
+    os.remove(archive_file)

@@ -4,7 +4,7 @@ import json
 import requests
 import shutil
 import gzip
-import wikiquote_dump
+import wikiquote
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -25,47 +25,22 @@ ELASTIC_SERVER_URL = os.environ.get("ELASTIC_SERVER_URL", "http://localhost:9200
 ELASTIC_INDEX_URL = f"{ELASTIC_SERVER_URL}/{ELASTIC_INDEX}"
 
 
-def _already_ingested(dump_date):
+def _already_ingested(dump_date: str) -> bool:
     """Returns true if this has already ingested the dump for the date"""
     success_file_path = os.path.join(SUCCESS_DIR, f"success_{dump_date}")
-    logger.info(f"Checking if already imported dump: {success_file_path}")
+    logger.info(f"Checking if already imported dump for date: {dump_date}")
     return os.path.isfile(success_file_path)
 
 
-# def elastic_server_running():
-#     """Returns true if the elastic server is running."""
-#     logging.debug(f"Checking if elastic server is running at: {ELASTIC_SERVER_URL}")
-#     try:
-#         r = requests.get(ELASTIC_SERVER_URL)
-#         return r.status_code == 200
-#     except Exception as e:
-#         logger.error(e)
-#         return False
-
-
-# def download_wikiquote_dump(dump_date):
-#     """Downloads the elastic search data for wikiquote"""
-#     if os.path.isfile(DUMP_FILE_PATH):
-#         logging.info(f"Skipping wikiquote dump download, file already exists.")
-#         return
-#     logging.info(f"Downloading wikiquote dump file.")
-#     url = str.format(DUMP_URL_TEMPLATE, date=dump_date)
-#     archive_file_path = f"{DUMP_FILE_PATH}.gz"
-#     # download the archive
-#     with requests.get(url, stream=True) as r:
-#         r.raise_for_status()
-#         # stream file to disk
-#         with open(archive_file_path, "wb") as f:
-#             for chunk in r.iter_content(2048):
-#                 if chunk:
-#                     f.write(chunk)
-#     # unzip the archive
-#     logging.info(f"Decompressing wikiquote dump file.")
-#     with gzip.open(archive_file_path, "rb") as src:
-#         with open(DUMP_FILE_PATH, "wb") as dest:
-#             shutil.copyfileobj(src, dest)
-#     # delete the original archive
-#     os.remove(archive_file_path)
+def _elastic_server_running() -> bool:
+    """Returns true if the elastic server is running."""
+    logging.debug(f"Checking if elastic server is running at: {ELASTIC_SERVER_URL}")
+    try:
+        r = requests.get(ELASTIC_SERVER_URL)
+        return r.status_code == 200
+    except Exception as e:
+        logger.error(e)
+        return False
 
 
 # def _get_document_keys():
@@ -189,17 +164,17 @@ def _already_ingested(dump_date):
 
 # check if success file exits, if so exit early
 def main():
-    dump_info = wikiquote_dump.get_dump_info()
+    dump_info = wikiquote.get_latest_dump_info()
     logging.info(f"Starting ingest for date: {dump_info}")
     # don't re-ingest if already ingested
     if _already_ingested(dump_info.date):
         logging.info(f"Successfully ingested data for dump date: {dump_info.date}")
         return
-    # # can't ingest data if the server isn't running
-    # if not elastic_server_running():
-    #     logging.error("Failed to connect to elasticsearch server")
-    #     exit(1)
-    # download_wikiquote_dump(dump_date)
+    # can't ingest data if the server isn't running
+    if not _elastic_server_running():
+        logging.error("Failed to connect to elasticsearch server")
+        exit(1)
+    wikiquote.download(dump_info, LOCAL_DUMP_FILE_PATH)
     # split_dump_file()
     # create_index()
     # bulk_load_into_elastic()

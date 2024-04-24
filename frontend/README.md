@@ -6,7 +6,7 @@ Built with `react`, `vite`, and `tailwindcss`.
 
 ## Usage
 
-This application depends on the api container, and is intended to be ran through docker compose.
+This application depends on the api service, and is intended to be ran through docker compose.
 
 At the root of the repo run:
 

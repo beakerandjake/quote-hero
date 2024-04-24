@@ -24,7 +24,7 @@ Returns information about the elasticsearch index.
 
 ## Usage
 
-This application depends on the elasticsearch containers running and healthy, and is intended to be ran through docker compose.
+This application depends on the elasticsearch service being healthy, and is intended to be ran through docker compose.
 
 At the root of the repo run:
 

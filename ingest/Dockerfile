@@ -5,6 +5,7 @@ WORKDIR /ingest
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ingest.py index_settings.json wikiquote.json .
+COPY index_settings.json wikiquote.json .
+COPY src src
 
-CMD [ "python", "ingest.py" ]
+CMD [ "python", "src/ingest.py" ]

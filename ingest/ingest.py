@@ -7,6 +7,7 @@ import gzip
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urljoin
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -63,23 +64,23 @@ def _get_most_recent_dump_dates() -> list[str]:
     return [m.group(1) for m in (date_regexp.match(link) for link in links) if m]
 
 
-def _file_name(date):
+def _file_name(date: str) -> str:
     """Returns the expected name of the wikiquote dump file for the specified date"""
     return f"enwikiquote-{date}-cirrussearch-content.json.gz"
 
 
-def _url_for_date(date):
+def _url_for_date(date: str) -> str:
     """Returns a url to the directory index of the dump at the specified date"""
     return urljoin(WIKIQUOTE_DUMP_ROOT_URL, f"{date}/")
 
 
-def _file_url(date):
+def _file_url(date: str) -> str:
     """Returns the url to a wikiquote dump file for the specified date"""
     return urljoin(_url_for_date(date), _file_name(date))
 
 
-def _find_valid_wikiquote_dump(dates: list[str]) -> WikiquoteDumpInfo:
-    """Returns the first date which contains a wikiquote dump"""
+def _first_valid_wikiquote_dump(dates: list[str]) -> Optional[WikiquoteDumpInfo]:
+    """Returns info for the first date which contains a wikiquote dump (if any)"""
     for date in dates:
         logger.debug(f"Searching dump: {date} for a wikiquote dump.")
         # get the directory index of the dump for this date
@@ -98,7 +99,7 @@ def _find_valid_wikiquote_dump(dates: list[str]) -> WikiquoteDumpInfo:
     return None
 
 
-def get_dump_info() -> WikiquoteDumpInfo:
+def get_dump_info() -> Optional[WikiquoteDumpInfo]:
     """Returns the info of the most recent wikiquote dump"""
     # allow manual override
     if WIKIQUOTE_DUMP_DATE_OVERRIDE is not None:
@@ -109,7 +110,7 @@ def get_dump_info() -> WikiquoteDumpInfo:
             WIKIQUOTE_DUMP_DATE_OVERRIDE, _file_url(WIKIQUOTE_DUMP_DATE_OVERRIDE)
         )
     logging.info("Finding date of last good wikiquote dump.")
-    return _find_valid_wikiquote_dump(_get_most_recent_dump_dates())
+    return _first_valid_wikiquote_dump(_get_most_recent_dump_dates())
 
 
 # def already_ingested(dump_date):

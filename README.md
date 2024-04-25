@@ -140,7 +140,7 @@ Distributed under the GPL-3.0 License. See `LICENSE.txt` for more information.
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[product-screenshot]: https://github.com/beakerandjake/quote-master/assets/1727349/c1ba86fa-ff92-43c7-8307-e15c9b09b1e2
+[product-screenshot]: https://github.com/beakerandjake/quote-master/assets/1727349/20e74852-85b6-452e-9fb6-6c0a21f22e0c
 [Nginx]: https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white
 [Nginx-url]: https://nginx.org
 [Docker]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white

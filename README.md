@@ -1,8 +1,6 @@
 <!-- adapted from: https://github.com/othneildrew/Best-README-Template -->
 <a name="readme-top"></a>
 
-# 🚧 WIP README 🚧
-
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">

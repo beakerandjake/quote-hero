@@ -6,10 +6,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/beakerandjake/quote-master">
-    <img src="images/logo.png" alt="Logo" width="80" height="80" />
-  </a>
-  <h2 align="center">quote-master</h2>
+  <h1 align="center">quote-master</h1>
   <p align="center">Searching Wikiquote with Elasticsearch</p>
 </div>
 

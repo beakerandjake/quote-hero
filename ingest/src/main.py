@@ -16,16 +16,15 @@ ROOT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 )
 CHUNKS_DIR = os.path.join(ROOT_DIR, "chunks")
-SUCCESS_DIR = os.path.join(ROOT_DIR, "success")
+SUCCESS_FILE_PATH = os.path.join(ROOT_DIR, 'success')
 LOCAL_DUMP_FILE_PATH = os.path.join(ROOT_DIR, "wikiquote.json")
 ELASTIC_INDEX_CONFIG_PATH = os.path.join(ROOT_DIR, "index_settings.json")
 
 
-def _already_ingested(date: str) -> bool:
-    """Returns true if this has already ingested the dump for the date"""
-    success_file_path = os.path.join(SUCCESS_DIR, f"success_{date}")
-    logger.info(f"Checking if already imported dump for date: {date}")
-    return os.path.isfile(success_file_path)
+def _already_ingested() -> bool:
+    """Returns true if the success file exists, indicating that the ingest process has already ran."""
+    logger.info(f"Checking if ingest has already ran.")
+    return os.path.isfile(SUCCESS_FILE_PATH)
 
 
 def _get_index_keys() -> dict:
@@ -48,23 +47,22 @@ def _clean_up_files():
     shutil.rmtree(CHUNKS_DIR)
 
 
-def _save_ingest_success(date: str):
-    """Writes a success file so the ingest won't occur again for this date"""
-    success_file_path = os.path.join(SUCCESS_DIR, f"success_{date}")
-    logger.debug(f"Saving ingest success: {success_file_path}")
-    os.makedirs(os.path.dirname(success_file_path), exist_ok=True)
-    open(success_file_path, "w").close()
+def _save_ingest_success():
+    """Writes a success file so the ingest won't occur again."""
+    logger.debug(f"Saving ingest success file to: {SUCCESS_FILE_PATH}")
+    os.makedirs(os.path.dirname(SUCCESS_FILE_PATH), exist_ok=True)
+    open(SUCCESS_FILE_PATH, "w").close()
 
 
 # check if success file exits, if so exit early
 def main():
     logging.debug("Starting ingest.")
+    # don't re-ingest if already ingested
+    if _already_ingested():
+        logging.info(f"Ingest process already completed.")
+        return
     dump_info = wikiquote.get_latest_dump_info()
     logging.info(f"Starting ingest for date: {dump_info}")
-    # don't re-ingest if already ingested
-    if _already_ingested(dump_info.date):
-        logging.info(f"Successfully ingested data for dump date: {dump_info.date}")
-        return
     # can't ingest data if the server isn't running
     if not elastic.server_running():
         logging.error("Failed to connect to elasticsearch server")
@@ -75,7 +73,7 @@ def main():
     elastic.create_index(ELASTIC_INDEX_CONFIG_PATH)
     elastic.bulk_load(CHUNKS_DIR)
     _clean_up_files()
-    _save_ingest_success(dump_info.date)
+    _save_ingest_success()
     logger.info(f"Successfully ingested data for date: {dump_info.date}")
 
 

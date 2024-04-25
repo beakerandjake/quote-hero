@@ -50,8 +50,8 @@ quote-master is game where you attempt to match as many Wikiquote pages as possi
 quote-master is made up of several applications orchestrated with Docker Compose:
 
 - A single node Elasticsearch cluster is used to search for matching pages.
-- The ingest process creates an ElasticSearch index and populates it with the most recent dump published by Wikiquote [add link].
-- The api returns random words (using the top 10,000 most frequent [add link] english language words), and returns the search results.
+- The ingest process creates an ElasticSearch index and populates it with the most recent [dump][wikiquote-dump-url] published by Wikiquote.
+- The api returns random words (using the top [10,000 most frequent][common-words-url] english language words), and returns the search results.
 - The frontend allows users play quote-master
 - An nginx reverse proxy serves the frontend and api.
 
@@ -140,3 +140,5 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 [ElasticSearch]: https://img.shields.io/badge/-ElasticSearch-005571?style=for-the-badge&logo=elasticsearch
 [ElasticSearch-url]: https://www.elastic.co/elasticsearch
 [install-docker-url]: https://docs.docker.com/engine/install/
+[common-words-url]: https://github.com/first20hours/google-10000-english 
+[wikiquote-dump-url]: https://dumps.wikimedia.org/

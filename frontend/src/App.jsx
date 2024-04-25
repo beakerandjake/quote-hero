@@ -84,10 +84,10 @@ export const App = () => {
         <div className="mt-4 flex flex-col items-center gap-3 md:gap-5">
           {/* Words controls */}
           <div className="flex gap-4">
-            <Button disabled={!!results || isLoading} onClick={onAddWord}>
+            <Button disabled={!!results} onClick={onAddWord}>
               Add Word
             </Button>
-            <Button disabled={!words.length || isLoading} onClick={onReset}>
+            <Button disabled={!words.length} onClick={onReset}>
               Reset
             </Button>
           </div>
@@ -97,11 +97,7 @@ export const App = () => {
           </div>
           {/* Submit Buttons */}
           {!!words.length && !results && (
-            <SubmitControls
-              wordCount={words.length}
-              onSubmit={onSubmit}
-              disabled={isLoading}
-            />
+            <SubmitControls wordCount={words.length} onSubmit={onSubmit} />
           )}
           {/* Results */}
           {!!results && <Results results={results} />}

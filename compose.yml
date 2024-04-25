@@ -4,8 +4,6 @@ services:
     container_name: elastic
     volumes:
       - elastic:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
@@ -44,8 +42,6 @@ services:
   frontend:
     build: frontend
     container_name: frontend
-    ports:
-      - "80:80"
     depends_on:
       ingest:
         condition: service_completed_successfully

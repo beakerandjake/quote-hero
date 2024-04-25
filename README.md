@@ -112,9 +112,19 @@ docker logs --follow ingest
 
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+After the project is running navigate to `http://localhost:8080` in your browser. 
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+### How To Play
+
+ 1. Click the "Add Word" button to get a random word. 
+ 2. Now you must decide if you want to keep adding words or to use the words you have. Keep in mind you cannot delete words, once you add a word you are stuck with it.
+ 3. Once you are satisfied with your words you have to choose how you want to match:
+    - If you are confident about your words you can click the **Match Exact** button. This will search any pages with the exact phrase formed by the words.
+    - Otherwise you can click the **Match Fuzzy** button, this is a more forgiving search. It finds any pages which contains all of the words at least once somewhere on the page.
+    - _Note_: If you only have one word you are only presented with one match button. 
+4. At any time you can click the **Reset** button to clear your words and the results and start over.
+
+The goal is to use as many words as possible to match as many pages as possible.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

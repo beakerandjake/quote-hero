@@ -43,7 +43,7 @@
 
 ## About
 
-![project-screenshot]
+![product-screenshot]
 
 quote-master is game where you attempt to match as many Wikiquote pages as possible using random words. Adding more words gives you a higher score, but is risky because you might not be able any pages. Depending on how confident you are in your set of words you can choose to match your words exactly or loosely.
 
@@ -140,7 +140,7 @@ Distributed under the GPL-3.0 License. See `LICENSE.txt` for more information.
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: https://github.com/beakerandjake/quote-master/assets/1727349/c1ba86fa-ff92-43c7-8307-e15c9b09b1e2
 [Nginx]: https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white
 [Nginx-url]: https://nginx.org
 [Docker]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white

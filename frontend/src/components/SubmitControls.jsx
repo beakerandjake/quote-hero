@@ -3,19 +3,25 @@ import { Button } from "./Button";
 /**
  * Controls that should appear when there is only one word
  */
-const SingleWordControls = ({ onSubmit }) => (
-  <Button onClick={() => onSubmit(false)}>Match</Button>
+const SingleWordControls = ({ onSubmit, disabled }) => (
+  <Button onClick={() => onSubmit(false)} disabled={disabled}>
+    Match
+  </Button>
 );
 
 /**
  * Controls that should appear when there is multiple words.
  */
-const MultipleWordsControls = ({ onSubmit }) => (
+const MultipleWordsControls = ({ onSubmit, disabled }) => (
   <div className="flex flex-col items-center gap-4">
     <div className="flex items-center gap-4">
-      <Button onClick={() => onSubmit(true)}>Match Fuzzy</Button>
+      <Button onClick={() => onSubmit(true)} disabled={disabled}>
+        Match Fuzzy
+      </Button>
       <span className="text-md font-bold dark:text-white">OR</span>
-      <Button onClick={() => onSubmit(false)}>Match Exact</Button>
+      <Button onClick={() => onSubmit(false)} disabled={disabled}>
+        Match Exact
+      </Button>
     </div>
   </div>
 );
@@ -23,12 +29,12 @@ const MultipleWordsControls = ({ onSubmit }) => (
 /**
  * The controls used to submit the search. Allows fuzzy or exact matching.
  */
-export const SubmitControls = ({ wordCount, onSubmit }) => {
-  // If there is only one word, there isn't a difference 
+export const SubmitControls = ({ wordCount, onSubmit, disabled }) => {
+  // If there is only one word, there isn't a difference
   // between fuzzy or exact searching so just show one control.
   if (wordCount < 2) {
-    return <SingleWordControls onSubmit={onSubmit} />;
+    return <SingleWordControls onSubmit={onSubmit} disabled={disabled} />;
   }
   // If there are multiple words, make the user choose between fuzzy or exact search
-  return <MultipleWordsControls onSubmit={onSubmit} />;
+  return <MultipleWordsControls onSubmit={onSubmit} disabled={disabled} />;
 };

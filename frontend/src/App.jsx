@@ -10,6 +10,7 @@ import { HighScores } from "./components/HighScores.jsx";
 export const App = () => {
   const [words, setWords] = useState([]);
   const [results, setResults] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [highScores, setHighScores] = useState({
     easy: {
       wordCount: 0,
@@ -23,8 +24,13 @@ export const App = () => {
 
   // gets a random word from the api and adds it to our word collection
   const onAddWord = async () => {
+    if (isLoading) {
+      return;
+    }
+    setIsLoading(true);
     const word = await getWord();
     setWords((prev) => [...prev, word]);
+    setIsLoading(false);
   };
 
   // clears the current words and results.
@@ -59,12 +65,14 @@ export const App = () => {
 
   // searches with the current words
   const onSubmit = async (easy) => {
-    if (!words.length) {
+    if (!words.length || isLoading) {
       return;
     }
+    setIsLoading(true);
     const results = await search(words, easy);
     setResults(results);
     tryToUpdateHighScores(results.total, easy);
+    setIsLoading(false);
   };
 
   return (
@@ -76,10 +84,10 @@ export const App = () => {
         <div className="mt-4 flex flex-col items-center gap-3 md:gap-5">
           {/* Words controls */}
           <div className="flex gap-4">
-            <Button disabled={!!results} onClick={onAddWord}>
+            <Button disabled={!!results || isLoading} onClick={onAddWord}>
               Add Word
             </Button>
-            <Button disabled={!words.length} onClick={onReset}>
+            <Button disabled={!words.length || isLoading} onClick={onReset}>
               Reset
             </Button>
           </div>
@@ -89,7 +97,11 @@ export const App = () => {
           </div>
           {/* Submit Buttons */}
           {!!words.length && !results && (
-            <SubmitControls wordCount={words.length} onSubmit={onSubmit} />
+            <SubmitControls
+              wordCount={words.length}
+              onSubmit={onSubmit}
+              disabled={isLoading}
+            />
           )}
           {/* Results */}
           {!!results && <Results results={results} />}

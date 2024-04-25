@@ -16,7 +16,7 @@ ROOT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 )
 CHUNKS_DIR = os.path.join(ROOT_DIR, "chunks")
-SUCCESS_FILE_PATH = os.path.join(ROOT_DIR, 'success')
+SUCCESS_FILE_PATH = os.path.join(ROOT_DIR, 'success', 'success.log')
 LOCAL_DUMP_FILE_PATH = os.path.join(ROOT_DIR, "wikiquote.json")
 ELASTIC_INDEX_CONFIG_PATH = os.path.join(ROOT_DIR, "index_settings.json")
 

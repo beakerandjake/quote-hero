@@ -9,13 +9,13 @@ export const getWord = async () => {
   return await response.json();
 };
 
-export const search = async (words, easy) => {
+export const search = async (words, forgiving) => {
   const response = await fetch(`${API_ENDPOINT}/search`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ terms: words, exact: !easy }),
+    body: JSON.stringify({ terms: words, exact: !forgiving }),
   });
   return response.json();
 };

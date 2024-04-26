@@ -18,7 +18,7 @@ export const Results = ({ results }) => {
   if (!results.total) {
     return <NoMatches />;
   }
-  const matchType = results.easy ? "Forgiving" : "Exact";
+  const matchType = results.forgiving ? "Forgiving" : "Exact";
   return (
     <Card>
       {/* Header */}

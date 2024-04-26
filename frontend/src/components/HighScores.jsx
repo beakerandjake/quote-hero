@@ -26,11 +26,11 @@ export const HighScores = ({ highScores }) => {
           High Scores
         </h3>
         <div>
-          {highScores.easy.wordCount > 0 && (
-            <HighScore name="Forgiving" {...highScores.easy} />
+          {highScores.forgiving.wordCount > 0 && (
+            <HighScore name="Forgiving" {...highScores.forgiving} />
           )}
-          {highScores.hard.wordCount > 0 && (
-            <HighScore name="Exact" {...highScores.hard} />
+          {highScores.exact.wordCount > 0 && (
+            <HighScore name="Exact" {...highScores.exact} />
           )}
         </div>
       </div>

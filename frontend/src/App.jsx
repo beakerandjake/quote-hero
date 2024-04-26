@@ -12,11 +12,11 @@ export const App = () => {
   const [results, setResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [highScores, setHighScores] = useState({
-    easy: {
+    forgiving: {
       wordCount: 0,
       matchCount: 0,
     },
-    hard: {
+    exact: {
       wordCount: 0,
       matchCount: 0,
     },
@@ -40,8 +40,8 @@ export const App = () => {
   };
 
   // update the high scores if beat the records.
-  const tryToUpdateHighScores = (matchCount, easy) => {
-    const scoreKey = easy ? "easy" : "hard";
+  const tryToUpdateHighScores = (matchCount, forgiving) => {
+    const scoreKey = forgiving ? "forgiving" : "exact";
     const best = highScores[scoreKey];
     // bail if didn't have any matches or didn't beat word count.
     if (matchCount < 1 || words.length < best.wordCount) {
@@ -64,14 +64,14 @@ export const App = () => {
   };
 
   // searches with the current words
-  const onSubmit = async (easy) => {
+  const onSubmit = async (forgiving) => {
     if (!words.length || isLoading) {
       return;
     }
     setIsLoading(true);
-    const results = await search(words, easy);
-    setResults({ ...results, easy });
-    tryToUpdateHighScores(results.total, easy);
+    const results = await search(words, forgiving);
+    setResults({ ...results, forgiving });
+    tryToUpdateHighScores(results.total, forgiving);
     setIsLoading(false);
   };
 
@@ -102,7 +102,7 @@ export const App = () => {
           {/* Results */}
           {!!results && <Results results={results} />}
           {/* High Scores */}
-          {(!!highScores.easy.wordCount || !!highScores.hard.wordCount) && (
+          {(!!highScores.forgiving.wordCount || !!highScores.exact.wordCount) && (
             <HighScores highScores={highScores} />
           )}
         </div>

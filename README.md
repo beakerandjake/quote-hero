@@ -115,7 +115,7 @@ After the project is running navigate to `http://localhost:8080` in your browser
  2. Now you must decide if you want to keep adding words or to use the words you have. Keep in mind you cannot delete words, once you add a word you are stuck with it.
  3. Once you are satisfied with your words you have to choose how you want to match:
     - If you are confident about your words you can click the **Match Exact** button. This will search any pages with the exact phrase formed by the words.
-    - Otherwise you can click the **Match Fuzzy** button, this is a more forgiving search. It finds any pages which contains all of the words at least once somewhere on the page.
+    - Otherwise you can click the **Match Forgiving** button, this is a more lenient search. It finds any pages which contains all of the words at least once somewhere on the page.
     - _Note_: If you only have one word you are only presented with one match button. 
 4. At any time you can click the **Reset** button to clear your words and the results and start over.
 

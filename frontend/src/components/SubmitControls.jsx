@@ -13,7 +13,7 @@ const SingleWordControls = ({ onSubmit }) => (
 const MultipleWordsControls = ({ onSubmit }) => (
   <div className="flex flex-col items-center gap-4">
     <div className="flex items-center gap-4">
-      <Button onClick={() => onSubmit(true)}>Match Fuzzy</Button>
+      <Button onClick={() => onSubmit(true)}>Match Forgiving</Button>
       <span className="text-md font-bold dark:text-white">OR</span>
       <Button onClick={() => onSubmit(false)}>Match Exact</Button>
     </div>
@@ -21,14 +21,14 @@ const MultipleWordsControls = ({ onSubmit }) => (
 );
 
 /**
- * The controls used to submit the search. Allows fuzzy or exact matching.
+ * The controls used to submit the search. Allows forgiving or exact matching.
  */
 export const SubmitControls = ({ wordCount, onSubmit }) => {
   // If there is only one word, there isn't a difference
-  // between fuzzy or exact searching so just show one control.
+  // between forgiving or exact searching so just show one control.
   if (wordCount < 2) {
     return <SingleWordControls onSubmit={onSubmit} />;
   }
-  // If there are multiple words, make the user choose between fuzzy or exact search
+  // If there are multiple words, make the user choose between forgiving or exact search
   return <MultipleWordsControls onSubmit={onSubmit} />;
 };

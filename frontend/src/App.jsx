@@ -40,15 +40,15 @@ export const App = () => {
   };
 
   // update the high scores if beat the records.
-  const tryToUpdateHighScores = (matches, easy) => {
+  const tryToUpdateHighScores = (matchCount, easy) => {
     const scoreKey = easy ? "easy" : "hard";
     const best = highScores[scoreKey];
     // bail if didn't have any matches or didn't beat word count.
-    if (matches < 1 || words.length < best.wordCount) {
+    if (matchCount < 1 || words.length < best.wordCount) {
       return;
     }
     // bail if didn't beat match count.
-    if (words.length === best.wordCount && matches <= best.matchCount) {
+    if (words.length === best.wordCount && matchCount <= best.matchCount) {
       return;
     }
     // beat the high score by either number of words or same words but better match count.
@@ -57,7 +57,7 @@ export const App = () => {
       ...{
         [scoreKey]: {
           wordCount: words.length,
-          matchCount: matches,
+          matchCount: matchCount,
         },
       },
     });
@@ -70,7 +70,7 @@ export const App = () => {
     }
     setIsLoading(true);
     const results = await search(words, easy);
-    setResults(results);
+    setResults({ ...results, easy });
     tryToUpdateHighScores(results.total, easy);
     setIsLoading(false);
   };

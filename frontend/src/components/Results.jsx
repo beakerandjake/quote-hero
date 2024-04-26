@@ -18,14 +18,15 @@ export const Results = ({ results }) => {
   if (!results.total) {
     return <NoMatches />;
   }
+  const matchType = results.easy ? "Forgiving" : "Exact";
   return (
     <Card>
       {/* Header */}
       <div className="mb-2">
-        <h1 className="text-xl md:text-2xl font-medium leading-6 text-gray-900 dark:text-white">
+        <h1 className="text-xl font-medium leading-6 text-gray-900 md:text-2xl dark:text-white">
           {results.total === 1
-            ? "Found One Match"
-            : `Found ${results.total.toLocaleString()} Matches`}
+            ? `Found One ${matchType} Match`
+            : `Found ${results.total.toLocaleString()} ${matchType} Matches`}
         </h1>
       </div>
       {/* Content */}

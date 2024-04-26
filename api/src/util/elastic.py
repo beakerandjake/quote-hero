@@ -35,7 +35,7 @@ def search_exact(terms: list[str]):
     return _map_results(results)
 
 
-def search_fuzzy(terms: list[str]):
+def search_forgiving(terms: list[str]):
     """Returns all documents which contain all of the terms"""
     results = client.search(
         index=ELASTIC_INDEX,

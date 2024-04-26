@@ -27,7 +27,7 @@ export const HighScores = ({ highScores }) => {
         </h3>
         <div>
           {highScores.easy.wordCount > 0 && (
-            <HighScore name="Fuzzy" {...highScores.easy} />
+            <HighScore name="Forgiving" {...highScores.easy} />
           )}
           {highScores.hard.wordCount > 0 && (
             <HighScore name="Exact" {...highScores.hard} />

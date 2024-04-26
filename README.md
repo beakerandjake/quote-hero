@@ -40,13 +40,13 @@
 
 ![product-screenshot]
 
-quote-hero is game where you attempt to match as many Wikiquote pages as possible using random words. Adding more words gives you a higher score, but is risky because you might not be able any pages. Depending on how confident you are in your set of words you can choose to match your words exactly or loosely.
+quote-hero is game where you attempt to match as many Wikiquote pages as possible using random words. Adding more words gives you a higher score, but is risky because you may not match any pages. Depending on how confident you are in your set of words you can choose an exact match or a forgiving match.
 
 quote-hero is made up of several applications orchestrated with Docker Compose:
 
-- A single node Elasticsearch cluster is used to search for matching pages.
+- A single node Elasticsearch cluster is used to search for matching Wikiquote pages.
 - The ingest process creates an ElasticSearch index and populates it with the most recent [dump][wikiquote-dump-url] published by Wikiquote.
-- The api returns random words (using the top [10,000 most frequent][common-words-url] english language words), and returns the search results.
+- The api returns random words (using the top [10,000 most frequent][common-words-url] english language words), and returns the matching pages.
 - The frontend allows users play quote-hero
 - An nginx reverse proxy serves the frontend and api.
 
@@ -93,7 +93,7 @@ To stop the application
 
 ### Note
 
-Depending on your computer and internet connection it may take a while for the application to start up. The ingest process particularly may take a long time, it must download the 300mb Wikiquote dump and then load that data into Elasticsearch. The ingest process only occurs the first time you start the project. 
+Depending on your computer and internet connection it may take a while for the application to start up. The ingest process particularly may take a long time, it must download a very large Wikiquote dump file and then load that data into Elasticsearch. However this ingest process only occurs the first time you start the project. 
 
 To check on the progress of the ingest you can run the following command once the ingest container is running:
 
@@ -114,9 +114,9 @@ After the project is running navigate to `http://localhost:8080` in your browser
  1. Click the "Add Word" button to get a random word. 
  2. Now you must decide if you want to keep adding words or to use the words you have. Keep in mind you cannot delete words, once you add a word you are stuck with it.
  3. Once you are satisfied with your words you have to choose how you want to match:
-    - If you are confident about your words you can click the **Match Exact** button. This will search any pages with the exact phrase formed by the words.
+    - If you are confident in your words you can click the **Match Exact** button. This will match any pages with the exact phrase formed by the words.
     - Otherwise you can click the **Match Forgiving** button, this is a more lenient search. It finds any pages which contains all of the words at least once somewhere on the page.
-    - _Note_: If you only have one word you are only presented with one match button. 
+    - _Note_: If you only have one word you are only presented with one match button which performs an exact match. 
 4. At any time you can click the **Reset** button to clear your words and the results and start over.
 
 The goal is to use as many words as possible to match as many pages as possible.

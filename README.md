@@ -3,7 +3,7 @@
 
 <!-- PROJECT LOGO -->
 <div align="center">
-  <h1 align="center">quote-master 💬</h1>
+  <h1 align="center">quote-hero 💬</h1>
   <p align="center">Searching Wikiquote with Elasticsearch</p>
 </div>
 
@@ -40,14 +40,14 @@
 
 ![product-screenshot]
 
-quote-master is game where you attempt to match as many Wikiquote pages as possible using random words. Adding more words gives you a higher score, but is risky because you might not be able any pages. Depending on how confident you are in your set of words you can choose to match your words exactly or loosely.
+quote-hero is game where you attempt to match as many Wikiquote pages as possible using random words. Adding more words gives you a higher score, but is risky because you might not be able any pages. Depending on how confident you are in your set of words you can choose to match your words exactly or loosely.
 
-quote-master is made up of several applications orchestrated with Docker Compose:
+quote-hero is made up of several applications orchestrated with Docker Compose:
 
 - A single node Elasticsearch cluster is used to search for matching pages.
 - The ingest process creates an ElasticSearch index and populates it with the most recent [dump][wikiquote-dump-url] published by Wikiquote.
 - The api returns random words (using the top [10,000 most frequent][common-words-url] english language words), and returns the search results.
-- The frontend allows users play quote-master
+- The frontend allows users play quote-hero
 - An nginx reverse proxy serves the frontend and api.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -79,7 +79,7 @@ Docker Compose must be installed on your machine. It can be installed through do
 
 1. Clone this repo
    ```sh
-   git clone https://github.com/beakerandjake/quote-master
+   git clone https://github.com/beakerandjake/quote-hero
    ```
 2. Start the application
    ```sh

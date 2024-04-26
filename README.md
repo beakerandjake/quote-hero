@@ -40,7 +40,7 @@
 
 ![product-screenshot]
 
-quote-hero is game where you attempt to match as many Wikiquote pages as possible using random words. Adding more words gives you a higher score, but is risky because you may not match any pages. Depending on how confident you are in your set of words you can choose an exact match or a forgiving match.
+quote-hero is a game where you attempt to match as many Wikiquote pages as possible using random words. Adding more words gives you a higher score, but is risky because you may not match any pages. Depending on how confident you are in your set of words you can choose an exact match or a forgiving match.
 
 quote-hero is made up of several applications orchestrated with Docker Compose:
 
